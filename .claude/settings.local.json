@@ -3,7 +3,12 @@
     "allow": [
       "Bash(npx skills:*)",
       "Bash(pip install:*)",
-      "Bash(npx create-next-app@latest:*)"
+      "Bash(npx create-next-app@latest:*)",
+      "Bash(npm install:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm run:*)",
+      "Bash(rm:*)",
+      "Bash(python:*)"
     ]
   }
 }

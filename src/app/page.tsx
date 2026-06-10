@@ -1,65 +1,171 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useEffect, useCallback } from "react";
+import SearchFilters from "@/components/SearchFilters";
+import BudgetTable from "@/components/BudgetTable";
+import SummaryCards from "@/components/SummaryCards";
+import Pagination from "@/components/Pagination";
+import { BudgetItem } from "@/lib/types";
+
+interface BudgetResponse {
+  items: BudgetItem[];
+  total: number;
+  totalBudget: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  filters: {
+    funds: string[];
+    centers: string[];
+  };
+}
+
+interface SummaryResponse {
+  totalItems: number;
+  totalBudget: number;
+  byFund: { fund: string; total: number; count: number }[];
+  byCenter: { center: string; total: number; count: number }[];
+}
+
+export default function HomePage() {
+  const [data, setData] = useState<BudgetResponse | null>(null);
+  const [summary, setSummary] = useState<SummaryResponse | null>(null);
+  const [search, setSearch] = useState("");
+  const [fund, setFund] = useState("");
+  const [center, setCenter] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(25);
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (search) params.set("search", search);
+    if (fund) params.set("fund", fund);
+    if (center) params.set("center", center);
+    params.set("page", String(page));
+    params.set("limit", limit === 0 ? "10000" : String(limit));
+
+    const res = await fetch(`/api/budget?${params}`);
+    const json = await res.json();
+    setData(json);
+    setLoading(false);
+  }, [search, fund, center, page, limit]);
+
+  useEffect(() => {
+    fetch("/api/budget/summary")
+      .then((r) => r.json())
+      .then(setSummary);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(fetchData, 300);
+    return () => clearTimeout(timer);
+  }, [fetchData]);
+
+  const handleSearchChange = (val: string) => {
+    setSearch(val);
+    setPage(1);
+  };
+
+  const handleFundChange = (val: string) => {
+    setFund(val);
+    setPage(1);
+  };
+
+  const handleCenterChange = (val: string) => {
+    setCenter(val);
+    setPage(1);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          Budget Overview
+        </h2>
+        <p className="text-gray-500">
+          Explore the approved budget allocation for Kulhudhuffushi City Council
+          2026
+        </p>
+      </div>
+
+      {summary && (
+        <div className="mb-6">
+          <SummaryCards
+            totalBudget={summary.totalBudget}
+            totalItems={summary.totalItems}
+            filteredBudget={data?.totalBudget}
+            filteredItems={data?.total}
+          />
+        </div>
+      )}
+
+      {/* Fund breakdown */}
+      {summary && (
+        <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {summary.byFund.map((f) => (
+            <button
+              key={f.fund}
+              onClick={() => handleFundChange(fund === f.fund ? "" : f.fund)}
+              className={`p-3 rounded-lg border text-left transition ${
+                fund === f.fund
+                  ? "border-blue-500 bg-blue-50"
+                  : "border-gray-200 bg-white hover:border-gray-300"
+              }`}
+            >
+              <p className="text-xs font-medium text-gray-500">{f.fund}</p>
+              <p className="text-sm font-bold text-gray-900">
+                {new Intl.NumberFormat("en-US", {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                }).format(f.total)}
+              </p>
+              <p className="text-xs text-gray-400">{f.count} items</p>
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="mb-6">
+        <SearchFilters
+          search={search}
+          fund={fund}
+          center={center}
+          funds={data?.filters.funds || []}
+          centers={data?.filters.centers || []}
+          onSearchChange={handleSearchChange}
+          onFundChange={handleFundChange}
+          onCenterChange={handleCenterChange}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+          <p className="mt-3 text-gray-500">Loading budget data...</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+      ) : (
+        <>
+          <div className="mb-3 text-sm text-gray-500">
+            Showing {data?.items.length} of {data?.total} items
+          </div>
+          <BudgetTable items={data?.items || []} />
+          {data && (
+            <Pagination
+              page={data.page}
+              totalPages={data.totalPages}
+              limit={limit}
+              total={data.total}
+              onPageChange={setPage}
+              onLimitChange={(val) => {
+                setLimit(val);
+                setPage(1);
+              }}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+          )}
+        </>
+      )}
     </div>
   );
 }
