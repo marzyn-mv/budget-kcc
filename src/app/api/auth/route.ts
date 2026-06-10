@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
 
     if (!verifyAccessCode(accessCode)) {
       logger.warn("Failed login attempt", { ip });
-      addLog("warn", "login_failed", `Failed login from ${ip}`, ip);
+      await addLog("warn", "login_failed", `Failed login from ${ip}`, ip);
       return NextResponse.json(
         { error: "Invalid access code" },
         { status: 401 }
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     const token = getSessionToken();
     logger.info("Admin login successful", { ip });
-    addLog("info", "login_success", `Admin logged in from ${ip}`, ip);
+    await addLog("info", "login_success", `Admin logged in from ${ip}`, ip);
 
     const response = NextResponse.json({ message: "Authenticated" });
     response.cookies.set("admin_session", token, {
@@ -49,6 +49,6 @@ export async function DELETE() {
     maxAge: 0,
     path: "/",
   });
-  addLog("info", "logout", "Admin logged out");
+  await addLog("info", "logout", "Admin logged out");
   return response;
 }

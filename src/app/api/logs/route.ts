@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import getDb from "@/lib/db";
+import { sql, query } from "@/lib/db";
 import { verifySession } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
@@ -15,26 +15,35 @@ export async function GET(req: NextRequest) {
     const level = searchParams.get("level") || "";
     const offset = (page - 1) * limit;
 
-    const db = getDb();
+    let countResult;
+    let logsResult;
 
-    const where = level ? "WHERE level = ?" : "";
-    const params = level ? [level] : [];
+    if (level) {
+      countResult = await query<{ count: string }>(
+        "SELECT COUNT(*) as count FROM logs WHERE level = $1",
+        [level]
+      );
+      logsResult = await query(
+        "SELECT * FROM logs WHERE level = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3",
+        [level, limit, offset]
+      );
+    } else {
+      countResult = await query<{ count: string }>(
+        "SELECT COUNT(*) as count FROM logs"
+      );
+      logsResult = await query(
+        "SELECT * FROM logs ORDER BY created_at DESC LIMIT $1 OFFSET $2",
+        [limit, offset]
+      );
+    }
 
-    const countRow = db
-      .prepare(`SELECT COUNT(*) as count FROM logs ${where}`)
-      .get(...params) as { count: number };
-
-    const logs = db
-      .prepare(
-        `SELECT * FROM logs ${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`
-      )
-      .all(...params, limit, offset);
+    const count = parseInt(countResult.rows[0].count);
 
     return NextResponse.json({
-      logs,
-      total: countRow.count,
+      logs: logsResult.rows,
+      total: count,
       page,
-      totalPages: Math.ceil(countRow.count / limit),
+      totalPages: Math.ceil(count / limit),
     });
   } catch (error) {
     return NextResponse.json(

@@ -1,27 +1,14 @@
-import Database from "better-sqlite3";
-import path from "path";
-import fs from "fs";
+import { sql, createPool } from "@vercel/postgres";
+import type { VercelPool } from "@vercel/postgres";
 
-const DB_PATH = path.join(process.cwd(), "data", "budget.db");
+let initialized = false;
 
-// Ensure data directory exists
-fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+async function ensureTables() {
+  if (initialized) return;
 
-let db: Database.Database;
-
-function getDb(): Database.Database {
-  if (!db) {
-    db = new Database(DB_PATH);
-    db.pragma("journal_mode = WAL");
-    initializeDb(db);
-  }
-  return db;
-}
-
-function initializeDb(db: Database.Database) {
-  db.exec(`
+  await sql`
     CREATE TABLE IF NOT EXISTS budget_items (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id SERIAL PRIMARY KEY,
       upload_id INTEGER,
       act_code_id INTEGER,
       active_id INTEGER,
@@ -31,44 +18,70 @@ function initializeDb(db: Database.Database) {
       center_name TEXT NOT NULL,
       gl_code TEXT NOT NULL,
       budget TEXT NOT NULL DEFAULT '0.00',
-      created_at TEXT DEFAULT (datetime('now')),
-      updated_at TEXT DEFAULT (datetime('now'))
-    );
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW()
+    )
+  `;
 
+  await sql`
     CREATE TABLE IF NOT EXISTS upload_history (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id SERIAL PRIMARY KEY,
       filename TEXT NOT NULL,
       rows_imported INTEGER NOT NULL,
-      uploaded_at TEXT DEFAULT (datetime('now')),
+      uploaded_at TIMESTAMP DEFAULT NOW(),
       uploaded_by TEXT DEFAULT 'admin'
-    );
+    )
+  `;
 
+  await sql`
     CREATE TABLE IF NOT EXISTS logs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id SERIAL PRIMARY KEY,
       level TEXT NOT NULL,
       action TEXT NOT NULL,
       details TEXT,
       ip TEXT,
-      created_at TEXT DEFAULT (datetime('now'))
-    );
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `;
 
-    CREATE INDEX IF NOT EXISTS idx_budget_fund ON budget_items(fund);
-    CREATE INDEX IF NOT EXISTS idx_budget_center ON budget_items(center_name);
-    CREATE INDEX IF NOT EXISTS idx_budget_activity ON budget_items(activity_detail);
-    CREATE INDEX IF NOT EXISTS idx_logs_created ON logs(created_at);
-  `);
+  await sql`CREATE INDEX IF NOT EXISTS idx_budget_fund ON budget_items(fund)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_budget_center ON budget_items(center_name)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_budget_activity ON budget_items(activity_detail)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_logs_created ON logs(created_at)`;
+
+  initialized = true;
 }
 
-export function addLog(
+export async function getPool(): Promise<VercelPool> {
+  await ensureTables();
+  return createPool();
+}
+
+export async function query<T extends Record<string, unknown> = Record<string, unknown>>(
+  text: string,
+  params?: (string | number | null)[]
+) {
+  await ensureTables();
+  const pool = createPool();
+  const result = await pool.query<T>(text, params);
+  return result;
+}
+
+export async function addLog(
   level: string,
   action: string,
   details?: string,
   ip?: string
 ) {
-  const db = getDb();
-  db.prepare(
-    "INSERT INTO logs (level, action, details, ip) VALUES (?, ?, ?, ?)"
-  ).run(level, action, details || null, ip || null);
+  try {
+    await sql`
+      INSERT INTO logs (level, action, details, ip)
+      VALUES (${level}, ${action}, ${details || null}, ${ip || null})
+    `;
+  } catch {
+    // Silently fail — logging should never crash a request
+    console.error("Failed to write log to database");
+  }
 }
 
-export default getDb;
+export { sql, ensureTables };

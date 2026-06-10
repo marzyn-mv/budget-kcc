@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import getDb from "@/lib/db";
+import { sql } from "@/lib/db";
 import { verifySession } from "@/lib/auth";
 
 export async function GET(
@@ -13,27 +13,22 @@ export async function GET(
 
   try {
     const { id } = await params;
-    const db = getDb();
 
-    const upload = db
-      .prepare("SELECT * FROM upload_history WHERE id = ?")
-      .get(id) as { filename: string; uploaded_at: string } | undefined;
+    const uploadResult = await sql`SELECT * FROM upload_history WHERE id = ${id}`;
+    const upload = uploadResult.rows[0] as { filename: string; uploaded_at: string } | undefined;
 
     if (!upload) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    // Find logs related to this upload by filename and time
-    const logs = db
-      .prepare(
-        `SELECT * FROM logs
-         WHERE (action LIKE '%upload%' OR action LIKE '%seed%')
-           AND details LIKE ?
-         ORDER BY created_at DESC`
-      )
-      .all(`%${upload.filename}%`);
+    const logsResult = await sql`
+      SELECT * FROM logs
+      WHERE (action LIKE '%upload%' OR action LIKE '%seed%')
+        AND details LIKE ${'%' + upload.filename + '%'}
+      ORDER BY created_at DESC
+    `;
 
-    return NextResponse.json({ upload, logs });
+    return NextResponse.json({ upload, logs: logsResult.rows });
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to fetch logs" },
