@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql, addLog, getPool } from "@/lib/db";
 import { verifySession } from "@/lib/auth";
+import { invalidateCache } from "@/lib/cache";
 import logger from "@/lib/logger";
 
 export async function GET(req: NextRequest) {
@@ -70,6 +71,8 @@ export async function DELETE(req: NextRequest) {
     } finally {
       client.release();
     }
+
+    await invalidateCache("budget:*", "uploads:*");
 
     logger.info("Upload and related data deleted", {
       id,

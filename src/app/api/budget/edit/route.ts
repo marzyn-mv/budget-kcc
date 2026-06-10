@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql, addLog } from "@/lib/db";
 import { verifySession } from "@/lib/auth";
+import { invalidateCache } from "@/lib/cache";
 import logger from "@/lib/logger";
 
 export async function PUT(req: NextRequest) {
@@ -38,6 +39,8 @@ export async function PUT(req: NextRequest) {
         updated_at = NOW()
       WHERE id = ${id}
     `;
+
+    await invalidateCache("budget:summary", "budget:list:*", "budget:filters");
 
     logger.info("Budget item edited", { id, changes: body });
     await addLog("info", "edit", `Edited item #${id}: ${JSON.stringify(body)}`);
