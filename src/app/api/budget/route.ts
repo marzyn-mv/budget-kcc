@@ -58,56 +58,27 @@ export async function GET(req: NextRequest) {
           ? `WHERE ${conditions.join(" AND ")}`
           : "";
 
-        // Run count, items, and sum in parallel — all simple single-table queries
-        const [countResult, itemsResult, sumResult] = await Promise.all([
-          query<{ count: string }>(
-            `SELECT COUNT(*) as count FROM budget_items ${where}`,
-            params
-          ),
-          query(
-            `SELECT * FROM budget_items ${where} ORDER BY id ASC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
-            [...params, limit, offset]
-          ),
-          query<{ total: string }>(
-            `SELECT COALESCE(SUM(CAST(REPLACE(REPLACE(budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total FROM budget_items ${where}`,
-            params
-          ),
-        ]);
+        const countResult = await query<{ count: string }>(
+          `SELECT COUNT(*) as count FROM budget_items ${where}`,
+          params
+        );
         const count = parseInt(countResult.rows[0].count);
-        const rows = itemsResult.rows as Record<string, unknown>[];
 
-        // Fetch expense totals only for items on this page
-        if (rows.length > 0) {
-          const keys = rows.map((r) => `${r.gl_code}||${r.activity_detail}||${r.fund}`);
-          const uniqueKeys = [...new Set(keys)];
-          const placeholders = uniqueKeys.map((_, i) => `$${i + 1}`).join(", ");
+        const itemsResult = await query(
+          `SELECT * FROM budget_items ${where} ORDER BY id ASC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
+          [...params, limit, offset]
+        );
 
-          const [poAgg, vAgg] = await Promise.all([
-            query<{ key: string; total: string }>(
-              `SELECT gl_code || '||' || activity_detail || '||' || fund_code as key, SUM(total) as total
-               FROM po_reports
-               WHERE gl_code || '||' || activity_detail || '||' || fund_code IN (${placeholders})
-               GROUP BY gl_code, activity_detail, fund_code`,
-              uniqueKeys
-            ),
-            query<{ key: string; total: string }>(
-              `SELECT gl_code || '||' || activity_detail || '||' || fund_code as key, SUM(total) as total
-               FROM voucher_reports
-               WHERE gl_code || '||' || activity_detail || '||' || fund_code IN (${placeholders})
-               GROUP BY gl_code, activity_detail, fund_code`,
-              uniqueKeys
-            ),
-          ]);
+        const sumResult = await query<{ total: string }>(
+          `SELECT COALESCE(SUM(CAST(REPLACE(REPLACE(budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total FROM budget_items ${where}`,
+          params
+        );
 
-          const poMap = new Map(poAgg.rows.map((r) => [r.key, parseFloat(r.total) || 0]));
-          const vMap = new Map(vAgg.rows.map((r) => [r.key, parseFloat(r.total) || 0]));
-
-          for (const row of rows) {
-            const k = `${row.gl_code}||${row.activity_detail}||${row.fund}`;
-            (row as Record<string, unknown>).po_spent = poMap.get(k) || 0;
-            (row as Record<string, unknown>).voucher_spent = vMap.get(k) || 0;
-          }
-        }
+        const rows = itemsResult.rows.map((r) => ({
+          ...r,
+          po_spent: 0,
+          voucher_spent: 0,
+        }));
 
         return {
           items: rows,
