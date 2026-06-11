@@ -32,20 +32,6 @@ export default function RootLayout({
                   <p className="text-xs text-gray-500">Approved Budget 2026</p>
                 </div>
               </a>
-              <div className="flex items-center gap-4">
-                <a
-                  href="/"
-                  className="text-sm text-gray-600 hover:text-gray-900 transition"
-                >
-                  Budget
-                </a>
-                <a
-                  href="/admin"
-                  className="text-sm text-gray-600 hover:text-gray-900 transition"
-                >
-                  Admin
-                </a>
-              </div>
             </div>
           </div>
         </nav>
