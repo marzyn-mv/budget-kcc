@@ -38,18 +38,18 @@ export async function GET(req: NextRequest) {
 
         if (search) {
           conditions.push(
-            `(activity_detail ILIKE $${paramIndex} OR prog ILIKE $${paramIndex + 1} OR gl_code ILIKE $${paramIndex + 2})`
+            `(b.activity_detail ILIKE $${paramIndex} OR b.prog ILIKE $${paramIndex + 1} OR b.gl_code ILIKE $${paramIndex + 2})`
           );
           params.push(`%${search}%`, `%${search}%`, `%${search}%`);
           paramIndex += 3;
         }
         if (fund) {
-          conditions.push(`fund = $${paramIndex}`);
+          conditions.push(`b.fund = $${paramIndex}`);
           params.push(fund);
           paramIndex++;
         }
         if (center) {
-          conditions.push(`center_name = $${paramIndex}`);
+          conditions.push(`b.center_name = $${paramIndex}`);
           params.push(center);
           paramIndex++;
         }
@@ -57,22 +57,36 @@ export async function GET(req: NextRequest) {
         const where = conditions.length
           ? `WHERE ${conditions.join(" AND ")}`
           : "";
+        // Unaliased version for simple single-table queries
+        const wherePlain = where.replace(/b\./g, "");
 
-        const countResult = await query<{ count: string }>(
-          `SELECT COUNT(*) as count FROM budget_items ${where}`,
-          params
-        );
+        const [countResult, items, sumResult] = await Promise.all([
+          query<{ count: string }>(
+            `SELECT COUNT(*) as count FROM budget_items ${wherePlain}`,
+            params
+          ),
+          query(
+            `SELECT b.*,
+              COALESCE(po_agg.total, 0)::float as po_spent,
+              COALESCE(v_agg.total, 0)::float as voucher_spent
+            FROM budget_items b
+            LEFT JOIN (
+              SELECT gl_code, activity_detail, fund_code, SUM(total) as total
+              FROM po_reports GROUP BY gl_code, activity_detail, fund_code
+            ) po_agg ON po_agg.gl_code = b.gl_code AND po_agg.activity_detail = b.activity_detail AND po_agg.fund_code = b.fund
+            LEFT JOIN (
+              SELECT gl_code, activity_detail, fund_code, SUM(total) as total
+              FROM voucher_reports GROUP BY gl_code, activity_detail, fund_code
+            ) v_agg ON v_agg.gl_code = b.gl_code AND v_agg.activity_detail = b.activity_detail AND v_agg.fund_code = b.fund
+            ${where} ORDER BY b.id ASC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
+            [...params, limit, offset]
+          ),
+          query<{ total: string }>(
+            `SELECT COALESCE(SUM(CAST(REPLACE(REPLACE(budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total FROM budget_items ${wherePlain}`,
+            params
+          ),
+        ]);
         const count = parseInt(countResult.rows[0].count);
-
-        const items = await query(
-          `SELECT * FROM budget_items ${where} ORDER BY id ASC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
-          [...params, limit, offset]
-        );
-
-        const sumResult = await query<{ total: string }>(
-          `SELECT COALESCE(SUM(CAST(REPLACE(REPLACE(budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total FROM budget_items ${where}`,
-          params
-        );
 
         return {
           items: items.rows,

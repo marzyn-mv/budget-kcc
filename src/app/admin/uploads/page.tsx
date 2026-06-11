@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 interface Upload {
   id: number;
@@ -22,9 +21,6 @@ interface LogEntry {
 }
 
 export default function UploadHistoryPage() {
-  const router = useRouter();
-  const [authenticated, setAuthenticated] = useState(false);
-  const [checking, setChecking] = useState(true);
   const [uploads, setUploads] = useState<Upload[]>([]);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [relatedLogs, setRelatedLogs] = useState<LogEntry[]>([]);
@@ -33,19 +29,6 @@ export default function UploadHistoryPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<Upload | null>(null);
   const [deleteInput, setDeleteInput] = useState("");
 
-  useEffect(() => {
-    fetch("/api/auth")
-      .then((r) => r.json())
-      .then((d) => {
-        if (!d.authenticated) {
-          router.push("/admin");
-        } else {
-          setAuthenticated(true);
-        }
-        setChecking(false);
-      });
-  }, [router]);
-
   const fetchUploads = () => {
     fetch("/api/uploads")
       .then((r) => r.json())
@@ -53,8 +36,8 @@ export default function UploadHistoryPage() {
   };
 
   useEffect(() => {
-    if (authenticated) fetchUploads();
-  }, [authenticated]);
+    fetchUploads();
+  }, []);
 
   const handleExpand = async (id: number) => {
     if (expandedId === id) {
@@ -101,26 +84,10 @@ export default function UploadHistoryPage() {
     error: "bg-red-100 text-red-800",
   };
 
-  if (checking || !authenticated) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-r-transparent"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-6">
-        <a
-          href="/admin"
-          className="text-sm text-blue-600 hover:text-blue-800"
-        >
-          &larr; Back to Admin
-        </a>
-        <h2 className="text-2xl font-bold text-gray-900 mt-2">
-          Uploads
-        </h2>
+        <h2 className="text-2xl font-bold text-gray-900">Uploads</h2>
         <p className="text-gray-500 text-sm">
           View all Excel uploads with related activity logs
         </p>

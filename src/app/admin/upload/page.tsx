@@ -1,29 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function UploadPage() {
-  const router = useRouter();
-  const [authenticated, setAuthenticated] = useState(false);
-  const [checking, setChecking] = useState(true);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    fetch("/api/auth")
-      .then((r) => r.json())
-      .then((d) => {
-        if (!d.authenticated) {
-          router.push("/admin");
-        } else {
-          setAuthenticated(true);
-        }
-        setChecking(false);
-      });
-  }, [router]);
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,25 +39,8 @@ export default function UploadPage() {
     }
   };
 
-  if (checking || !authenticated) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-r-transparent"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <div className="mb-6">
-        <a
-          href="/admin"
-          className="text-sm text-blue-600 hover:text-blue-800"
-        >
-          &larr; Back to Admin
-        </a>
-      </div>
-
       <div className="bg-white rounded-xl shadow-lg p-8">
         <h2 className="text-xl font-bold text-gray-900 mb-2">
           Upload Budget Excel

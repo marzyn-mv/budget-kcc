@@ -6,7 +6,7 @@ import logger from "@/lib/logger";
 export async function GET() {
   try {
     const data = await getCached(
-      "budget:summary",
+      "budget:summary:v2",
       async () => {
         const totalResult = await sql`
           SELECT COUNT(*) as count,
@@ -14,6 +14,13 @@ export async function GET() {
           FROM budget_items
         `;
         const totalRow = totalResult.rows[0];
+
+        const spentResult = await sql`
+          SELECT COALESCE(
+            COALESCE((SELECT SUM(total) FROM po_reports), 0) +
+            COALESCE((SELECT SUM(total) FROM voucher_reports), 0),
+          0) as total_spent
+        `;
 
         const byFundResult = await sql`
           SELECT fund, COUNT(*) as count,
@@ -30,6 +37,7 @@ export async function GET() {
         return {
           totalItems: parseInt(totalRow.count),
           totalBudget: parseFloat(totalRow.total),
+          totalSpent: parseFloat(spentResult.rows[0].total_spent) || 0,
           byFund: byFundResult.rows.map((r) => ({
             ...r,
             count: parseInt(r.count),

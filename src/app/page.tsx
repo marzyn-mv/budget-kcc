@@ -5,6 +5,7 @@ import SearchFilters from "@/components/SearchFilters";
 import BudgetTable from "@/components/BudgetTable";
 import SummaryCards from "@/components/SummaryCards";
 import Pagination from "@/components/Pagination";
+import ExpenseDetailModal from "@/components/ExpenseDetailModal";
 import { BudgetItem } from "@/lib/types";
 
 interface BudgetResponse {
@@ -23,6 +24,7 @@ interface BudgetResponse {
 interface SummaryResponse {
   totalItems: number;
   totalBudget: number;
+  totalSpent: number;
   byFund: { fund: string; total: number; count: number }[];
   byCenter: { center: string; total: number; count: number }[];
 }
@@ -36,6 +38,7 @@ export default function HomePage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(25);
   const [loading, setLoading] = useState(true);
+  const [selectedItem, setSelectedItem] = useState<BudgetItem | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -80,20 +83,23 @@ export default function HomePage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Budget Overview
-        </h2>
-        <p className="text-gray-500">
-          Explore the approved budget allocation for Kulhudhuffushi City Council
-          2026
-        </p>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Budget Overview
+          </h2>
+          <p className="text-gray-500">
+            Explore the approved budget allocation for Kulhudhuffushi City Council
+            2026
+          </p>
+        </div>
       </div>
 
       {summary && (
         <div className="mb-6">
           <SummaryCards
             totalBudget={summary.totalBudget}
+            totalSpent={summary.totalSpent}
             totalItems={summary.totalItems}
             filteredBudget={data?.totalBudget}
             filteredItems={data?.total}
@@ -150,7 +156,7 @@ export default function HomePage() {
           <div className="mb-3 text-sm text-gray-500">
             Showing {data?.items.length} of {data?.total} items
           </div>
-          <BudgetTable items={data?.items || []} />
+          <BudgetTable items={data?.items || []} onItemClick={setSelectedItem} />
           {data && (
             <Pagination
               page={data.page}
@@ -165,6 +171,12 @@ export default function HomePage() {
             />
           )}
         </>
+      )}
+      {selectedItem && (
+        <ExpenseDetailModal
+          item={selectedItem}
+          onClose={() => setSelectedItem(null)}
+        />
       )}
     </div>
   );

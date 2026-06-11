@@ -1,33 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { LogEntry } from "@/lib/types";
 
 export default function LogsPage() {
-  const router = useRouter();
-  const [authenticated, setAuthenticated] = useState(false);
-  const [checking, setChecking] = useState(true);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [levelFilter, setLevelFilter] = useState("");
 
   useEffect(() => {
-    fetch("/api/auth")
-      .then((r) => r.json())
-      .then((d) => {
-        if (!d.authenticated) {
-          router.push("/admin");
-        } else {
-          setAuthenticated(true);
-        }
-        setChecking(false);
-      });
-  }, [router]);
-
-  useEffect(() => {
-    if (!authenticated) return;
     const params = new URLSearchParams();
     params.set("page", String(page));
     params.set("limit", "50");
@@ -39,7 +21,7 @@ export default function LogsPage() {
         setLogs(d.logs || []);
         setTotalPages(d.totalPages || 1);
       });
-  }, [authenticated, page, levelFilter]);
+  }, [page, levelFilter]);
 
   const levelColors: Record<string, string> = {
     info: "bg-blue-100 text-blue-800",
@@ -47,27 +29,11 @@ export default function LogsPage() {
     error: "bg-red-100 text-red-800",
   };
 
-  if (checking || !authenticated) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-r-transparent"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <a
-            href="/admin"
-            className="text-sm text-blue-600 hover:text-blue-800"
-          >
-            &larr; Back to Admin
-          </a>
-          <h2 className="text-2xl font-bold text-gray-900 mt-2">
-            System Logs
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-900">System Logs</h2>
         </div>
         <select
           value={levelFilter}
