@@ -36,6 +36,53 @@ export default function POReportPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(25);
   const [loading, setLoading] = useState(true);
+  const [showDeleteAll, setShowDeleteAll] = useState(false);
+  const [deleteInput, setDeleteInput] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [showDeleteSelected, setShowDeleteSelected] = useState(false);
+
+  const handleDeleteAll = async () => {
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/expense", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "po-report" }),
+      });
+      if (res.ok) {
+        setShowDeleteAll(false);
+        setDeleteInput("");
+        setSelected(new Set());
+        fetchData();
+      }
+    } catch {
+      // ignore
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selected.size === 0) return;
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/expense", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "po-report", ids: Array.from(selected) }),
+      });
+      if (res.ok) {
+        setSelected(new Set());
+        setShowDeleteSelected(false);
+        fetchData();
+      }
+    } catch {
+      // ignore
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -56,6 +103,10 @@ export default function POReportPage() {
     const timer = setTimeout(fetchData, 300);
     return () => clearTimeout(timer);
   }, [fetchData]);
+
+  useEffect(() => {
+    setSelected(new Set());
+  }, [page, search, fund]);
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,6 +140,34 @@ export default function POReportPage() {
     }
   };
 
+  const toggleSelect = (id: number) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (!data) return;
+    const allIds = data.items.map((i) => i.id);
+    const allSelected = allIds.every((id) => selected.has(id));
+    if (allSelected) {
+      setSelected((prev) => {
+        const next = new Set(prev);
+        allIds.forEach((id) => next.delete(id));
+        return next;
+      });
+    } else {
+      setSelected((prev) => {
+        const next = new Set(prev);
+        allIds.forEach((id) => next.add(id));
+        return next;
+      });
+    }
+  };
+
   const fundColors: Record<string, string> = {
     "J-GOM": "bg-blue-100 text-blue-800",
     "J-LCL": "bg-green-100 text-green-800",
@@ -97,6 +176,8 @@ export default function POReportPage() {
     "L-CRF": "bg-red-100 text-red-800",
     "L-CTPF": "bg-yellow-100 text-yellow-800",
   };
+
+  const pageAllSelected = data ? data.items.length > 0 && data.items.every((i) => selected.has(i.id)) : false;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -112,7 +193,55 @@ export default function POReportPage() {
             </p>
           )}
         </div>
+        {data && data.total > 0 && (
+          <button
+            onClick={() => setShowDeleteAll(true)}
+            className="px-4 py-2 text-sm border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition"
+          >
+            Remove All
+          </button>
+        )}
       </div>
+
+      {showDeleteAll && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600 text-lg">!</div>
+              <h3 className="text-lg font-semibold text-gray-900">Remove All PO Reports</h3>
+            </div>
+            <p className="text-sm text-gray-600 mb-2">
+              This will permanently delete all <strong className="text-gray-900">{data?.total}</strong> PO reports and remove them from expense tracking.
+            </p>
+            <p className="text-sm text-gray-600 mb-4">
+              Type <strong>DELETE</strong> to confirm.
+            </p>
+            <input
+              type="text"
+              value={deleteInput}
+              onChange={(e) => setDeleteInput(e.target.value)}
+              placeholder="DELETE"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-4 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+              autoFocus
+            />
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => { setShowDeleteAll(false); setDeleteInput(""); }}
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAll}
+                disabled={deleteInput !== "DELETE" || deleting}
+                className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              >
+                {deleting ? "Removing..." : "Remove All PO Reports"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Upload section */}
       <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
@@ -177,6 +306,57 @@ export default function POReportPage() {
         </select>
       </div>
 
+      {/* Selection toolbar */}
+      {selected.size > 0 && (
+        <div className="flex items-center gap-3 mb-4 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
+          <span className="text-sm font-medium text-blue-800">
+            {selected.size} selected
+          </span>
+          <button
+            onClick={() => setSelected(new Set())}
+            className="px-3 py-1.5 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-white transition"
+          >
+            Deselect All
+          </button>
+          <button
+            onClick={() => setShowDeleteSelected(true)}
+            className="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+          >
+            Delete Selected ({selected.size})
+          </button>
+        </div>
+      )}
+
+      {/* Confirm delete selected modal */}
+      {showDeleteSelected && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600 text-lg">!</div>
+              <h3 className="text-lg font-semibold text-gray-900">Delete Selected PO Reports</h3>
+            </div>
+            <p className="text-sm text-gray-600 mb-4">
+              Are you sure you want to permanently delete <strong className="text-gray-900">{selected.size}</strong> selected PO report{selected.size !== 1 ? "s" : ""}? This will also remove them from expense tracking.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteSelected(false)}
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteSelected}
+                disabled={deleting}
+                className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              >
+                {deleting ? "Deleting..." : `Delete ${selected.size} Report${selected.size !== 1 ? "s" : ""}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <div className="text-center py-12">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-r-transparent"></div>
@@ -186,24 +366,39 @@ export default function POReportPage() {
           {/* Mobile cards */}
           <div className="md:hidden space-y-3">
             {data?.items.map((item) => (
-              <div key={item.id} className="bg-white rounded-lg border border-gray-200 p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${fundColors[item.fund_code] || "bg-gray-100 text-gray-800"}`}>
-                      {item.fund_code}
-                    </span>
-                    <span className="text-xs text-gray-400">{item.po_create_date}</span>
+              <div
+                key={item.id}
+                className={`bg-white rounded-lg border p-4 transition ${
+                  selected.has(item.id) ? "border-blue-400 bg-blue-50/50" : "border-gray-200"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={selected.has(item.id)}
+                    onChange={() => toggleSelect(item.id)}
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${fundColors[item.fund_code] || "bg-gray-100 text-gray-800"}`}>
+                          {item.fund_code}
+                        </span>
+                        <span className="text-xs text-gray-400">{item.po_create_date}</span>
+                      </div>
+                      <span className="text-base font-mono font-bold text-gray-900">
+                        {Number(item.total).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <p className="text-sm font-medium text-gray-900 mb-1">{item.supplier}</p>
+                    <p className="text-xs text-gray-500 mb-2">{item.po_remarks}</p>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
+                      <span><span className="text-gray-400">PO:</span> <span className="font-mono">{item.po_full}</span></span>
+                      <span><span className="text-gray-400">GL:</span> <span className="font-mono">{item.gl_code}</span></span>
+                      <span><span className="text-gray-400">Activity:</span> {item.activity_detail}</span>
+                    </div>
                   </div>
-                  <span className="text-base font-mono font-bold text-gray-900">
-                    {Number(item.total).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
-                <p className="text-sm font-medium text-gray-900 mb-1">{item.supplier}</p>
-                <p className="text-xs text-gray-500 mb-2">{item.po_remarks}</p>
-                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
-                  <span><span className="text-gray-400">PO:</span> <span className="font-mono">{item.po_full}</span></span>
-                  <span><span className="text-gray-400">GL:</span> <span className="font-mono">{item.gl_code}</span></span>
-                  <span><span className="text-gray-400">Activity:</span> {item.activity_detail}</span>
                 </div>
               </div>
             ))}
@@ -214,6 +409,14 @@ export default function POReportPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
+                  <th className="px-4 py-3 text-left">
+                    <input
+                      type="checkbox"
+                      checked={pageAllSelected}
+                      onChange={toggleSelectAll}
+                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                  </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">PO #</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Fund</th>
@@ -226,7 +429,18 @@ export default function POReportPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {data?.items.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50">
+                  <tr
+                    key={item.id}
+                    className={`transition ${selected.has(item.id) ? "bg-blue-50" : "hover:bg-gray-50"}`}
+                  >
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selected.has(item.id)}
+                        onChange={() => toggleSelect(item.id)}
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                    </td>
                     <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">{item.po_create_date}</td>
                     <td className="px-4 py-3 text-sm text-gray-600 font-mono whitespace-nowrap">{item.po_full}</td>
                     <td className="px-4 py-3">

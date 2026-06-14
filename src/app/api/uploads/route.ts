@@ -15,6 +15,8 @@ export async function GET(req: NextRequest) {
       SELECT
         uh.*,
         (SELECT COUNT(*) FROM budget_items WHERE upload_id = uh.id) as linked_items,
+        (SELECT COUNT(*) FROM po_reports WHERE upload_id = uh.id) as linked_pos,
+        (SELECT COUNT(*) FROM voucher_reports WHERE upload_id = uh.id) as linked_vouchers,
         (SELECT COUNT(*) FROM logs WHERE action = 'upload' AND details LIKE '%' || uh.filename || '%' AND created_at >= uh.uploaded_at) as related_logs
       FROM upload_history uh
       ORDER BY uh.uploaded_at DESC
@@ -24,6 +26,8 @@ export async function GET(req: NextRequest) {
       uploads: result.rows.map((r) => ({
         ...r,
         linked_items: parseInt(r.linked_items as string),
+        linked_pos: parseInt(r.linked_pos as string),
+        linked_vouchers: parseInt(r.linked_vouchers as string),
         related_logs: parseInt(r.related_logs as string),
       })),
     });
@@ -55,14 +59,22 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const countResult = await sql`SELECT COUNT(*) as count FROM budget_items WHERE upload_id = ${id}`;
-    const itemCount = parseInt(countResult.rows[0].count);
+    const [budgetCount, poCount, voucherCount] = await Promise.all([
+      sql`SELECT COUNT(*) as count FROM budget_items WHERE upload_id = ${id}`,
+      sql`SELECT COUNT(*) as count FROM po_reports WHERE upload_id = ${id}`,
+      sql`SELECT COUNT(*) as count FROM voucher_reports WHERE upload_id = ${id}`,
+    ]);
+    const budgetItemCount = parseInt(budgetCount.rows[0].count);
+    const poItemCount = parseInt(poCount.rows[0].count);
+    const voucherItemCount = parseInt(voucherCount.rows[0].count);
 
     const pool = await getPool();
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
       await client.query("DELETE FROM budget_items WHERE upload_id = $1", [id]);
+      await client.query("DELETE FROM po_reports WHERE upload_id = $1", [id]);
+      await client.query("DELETE FROM voucher_reports WHERE upload_id = $1", [id]);
       await client.query("DELETE FROM upload_history WHERE id = $1", [id]);
       await client.query("COMMIT");
     } catch (txError) {
@@ -72,22 +84,32 @@ export async function DELETE(req: NextRequest) {
       client.release();
     }
 
-    await invalidateCache("budget:*", "uploads:*");
+    await invalidateCache("budget:*", "uploads:*", "expense:*");
+
+    const parts = [
+      budgetItemCount > 0 ? `${budgetItemCount} budget items` : null,
+      poItemCount > 0 ? `${poItemCount} PO reports` : null,
+      voucherItemCount > 0 ? `${voucherItemCount} voucher reports` : null,
+    ].filter(Boolean).join(", ");
 
     logger.info("Upload and related data deleted", {
       id,
       filename: upload.filename,
-      budgetItemsDeleted: itemCount,
+      budgetItemsDeleted: budgetItemCount,
+      poReportsDeleted: poItemCount,
+      voucherReportsDeleted: voucherItemCount,
     });
     await addLog(
       "info",
       "upload_delete",
-      `Deleted upload #${id}: ${upload.filename} (${itemCount} budget items removed)`
+      `Deleted upload #${id}: ${upload.filename} (${parts || "no linked data"})`
     );
 
     return NextResponse.json({
       message: "Deleted successfully",
-      budgetItemsDeleted: itemCount,
+      budgetItemsDeleted: budgetItemCount,
+      poReportsDeleted: poItemCount,
+      voucherReportsDeleted: voucherItemCount,
     });
   } catch (error) {
     logger.error("Failed to delete upload history", { error });

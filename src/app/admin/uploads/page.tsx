@@ -9,6 +9,8 @@ interface Upload {
   uploaded_at: string;
   uploaded_by: string;
   linked_items: number;
+  linked_pos: number;
+  linked_vouchers: number;
   related_logs: number;
 }
 
@@ -117,8 +119,24 @@ export default function UploadHistoryPage() {
                       <span>{upload.rows_imported} rows imported</span>
                       <span>·</span>
                       <span className={upload.linked_items > 0 ? "text-green-600 font-medium" : "text-gray-400"}>
-                        {upload.linked_items} active items
+                        {upload.linked_items} budget items
                       </span>
+                      {upload.linked_pos > 0 && (
+                        <>
+                          <span>·</span>
+                          <span className="text-blue-600 font-medium">
+                            {upload.linked_pos} POs
+                          </span>
+                        </>
+                      )}
+                      {upload.linked_vouchers > 0 && (
+                        <>
+                          <span>·</span>
+                          <span className="text-purple-600 font-medium">
+                            {upload.linked_vouchers} vouchers
+                          </span>
+                        </>
+                      )}
                       <span>·</span>
                       <span>{upload.uploaded_at}</span>
                       <span>·</span>
@@ -211,12 +229,22 @@ export default function UploadHistoryPage() {
               This will permanently delete the upload record for{" "}
               <strong className="text-gray-900">{deleteConfirm.filename}</strong>.
             </p>
-            {deleteConfirm.linked_items > 0 && (
+            {(deleteConfirm.linked_items > 0 || deleteConfirm.linked_pos > 0 || deleteConfirm.linked_vouchers > 0) && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
-                <p className="text-sm text-red-700 font-medium">
-                  Warning: This will also delete {deleteConfirm.linked_items} budget
-                  item{deleteConfirm.linked_items !== 1 ? "s" : ""} linked to this upload.
+                <p className="text-sm text-red-700 font-medium mb-1">
+                  Warning: This will also delete:
                 </p>
+                <ul className="text-sm text-red-700 list-disc list-inside space-y-0.5">
+                  {deleteConfirm.linked_items > 0 && (
+                    <li>{deleteConfirm.linked_items} budget item{deleteConfirm.linked_items !== 1 ? "s" : ""}</li>
+                  )}
+                  {deleteConfirm.linked_pos > 0 && (
+                    <li>{deleteConfirm.linked_pos} PO report{deleteConfirm.linked_pos !== 1 ? "s" : ""}</li>
+                  )}
+                  {deleteConfirm.linked_vouchers > 0 && (
+                    <li>{deleteConfirm.linked_vouchers} voucher report{deleteConfirm.linked_vouchers !== 1 ? "s" : ""}</li>
+                  )}
+                </ul>
               </div>
             )}
             <p className="text-sm text-gray-600 mb-4">

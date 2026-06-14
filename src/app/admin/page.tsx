@@ -30,7 +30,7 @@ export default function AdminPage() {
     if (fund) params.set("fund", fund);
     if (center) params.set("center", center);
     params.set("page", String(page));
-    params.set("limit", limit === 0 ? "10000" : String(limit));
+    params.set("limit", String(limit));
 
     const res = await fetch(`/api/budget?${params}`);
     const json = await res.json();
