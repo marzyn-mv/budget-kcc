@@ -1,50 +1,57 @@
 import { NextResponse } from "next/server";
 import { sql, addLog } from "@/lib/db";
+import { getCached } from "@/lib/cache";
 import logger from "@/lib/logger";
 
 export async function GET() {
   try {
-    const [totalResult, spentResult, byFundResult, byCenterResult] = await Promise.all([
-      sql`
-        SELECT COUNT(*) as count,
-          COALESCE(SUM(CAST(REPLACE(REPLACE(budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total
-        FROM budget_items
-      `,
-      sql`
-        SELECT COALESCE(
-          COALESCE((SELECT SUM(total) FROM po_reports), 0) +
-          COALESCE((SELECT SUM(total) FROM voucher_reports), 0),
-        0) as total_spent
-      `,
-      sql`
-        SELECT fund, COUNT(*) as count,
-          COALESCE(SUM(CAST(REPLACE(REPLACE(budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total
-        FROM budget_items GROUP BY fund ORDER BY total DESC
-      `,
-      sql`
-        SELECT center_name as center, COUNT(*) as count,
-          COALESCE(SUM(CAST(REPLACE(REPLACE(budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total
-        FROM budget_items GROUP BY center_name ORDER BY total DESC
-      `,
-    ]);
+    const data = await getCached(
+      "budget:summary",
+      async () => {
+        const [totalResult, spentResult, byFundResult, byCenterResult] = await Promise.all([
+          sql`
+            SELECT COUNT(*) as count,
+              COALESCE(SUM(CAST(REPLACE(REPLACE(budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total
+            FROM budget_items
+          `,
+          sql`
+            SELECT COALESCE(
+              COALESCE((SELECT SUM(total) FROM po_reports), 0) +
+              COALESCE((SELECT SUM(total) FROM voucher_reports), 0),
+            0) as total_spent
+          `,
+          sql`
+            SELECT fund, COUNT(*) as count,
+              COALESCE(SUM(CAST(REPLACE(REPLACE(budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total
+            FROM budget_items GROUP BY fund ORDER BY total DESC
+          `,
+          sql`
+            SELECT center_name as center, COUNT(*) as count,
+              COALESCE(SUM(CAST(REPLACE(REPLACE(budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total
+            FROM budget_items GROUP BY center_name ORDER BY total DESC
+          `,
+        ]);
 
-    const totalRow = totalResult.rows[0];
+        const totalRow = totalResult.rows[0];
 
-    const data = {
-      totalItems: parseInt(totalRow.count),
-      totalBudget: parseFloat(totalRow.total),
-      totalSpent: parseFloat(spentResult.rows[0].total_spent) || 0,
-      byFund: byFundResult.rows.map((r) => ({
-        ...r,
-        count: parseInt(r.count),
-        total: parseFloat(r.total),
-      })),
-      byCenter: byCenterResult.rows.map((r) => ({
-        ...r,
-        count: parseInt(r.count),
-        total: parseFloat(r.total),
-      })),
-    };
+        return {
+          totalItems: parseInt(totalRow.count),
+          totalBudget: parseFloat(totalRow.total),
+          totalSpent: parseFloat(spentResult.rows[0].total_spent) || 0,
+          byFund: byFundResult.rows.map((r) => ({
+            ...r,
+            count: parseInt(r.count),
+            total: parseFloat(r.total),
+          })),
+          byCenter: byCenterResult.rows.map((r) => ({
+            ...r,
+            count: parseInt(r.count),
+            total: parseFloat(r.total),
+          })),
+        };
+      },
+      300
+    );
 
     logger.info("Budget summary fetched");
     return NextResponse.json(data);

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query, addLog } from "@/lib/db";
 import { verifySession } from "@/lib/auth";
+import { invalidateCache } from "@/lib/cache";
 import logger from "@/lib/logger";
 import * as XLSX from "xlsx";
 
@@ -120,6 +121,8 @@ export async function POST(req: NextRequest) {
         );
       }
     }
+
+    await invalidateCache("budget:*");
 
     await addLog("info", `${type}_upload`, `Uploaded ${file.name}: ${rows.length} rows`);
     logger.info(`${type} uploaded`, { filename: file.name, rows: rows.length });

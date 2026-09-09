@@ -1,12 +1,20 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import SearchFilters from "@/components/SearchFilters";
 import BudgetTable from "@/components/BudgetTable";
 import SummaryCards from "@/components/SummaryCards";
 import Pagination from "@/components/Pagination";
 import ExpenseDetailModal from "@/components/ExpenseDetailModal";
 import { BudgetItem } from "@/lib/types";
+
+interface SummaryData {
+  totalItems: number;
+  totalBudget: number;
+  totalSpent: number;
+  byFund: { fund: string; total: number; count: number }[];
+  byCenter: { center: string; total: number; count: number }[];
+}
 
 interface BudgetResponse {
   items: BudgetItem[];
@@ -19,19 +27,11 @@ interface BudgetResponse {
     funds: string[];
     centers: string[];
   };
-}
-
-interface SummaryResponse {
-  totalItems: number;
-  totalBudget: number;
-  totalSpent: number;
-  byFund: { fund: string; total: number; count: number }[];
-  byCenter: { center: string; total: number; count: number }[];
+  summary: SummaryData;
 }
 
 export default function HomePage() {
   const [data, setData] = useState<BudgetResponse | null>(null);
-  const [summary, setSummary] = useState<SummaryResponse | null>(null);
   const [search, setSearch] = useState("");
   const [fund, setFund] = useState("");
   const [center, setCenter] = useState("");
@@ -55,13 +55,14 @@ export default function HomePage() {
     setLoading(false);
   }, [search, fund, center, page, limit]);
 
-  useEffect(() => {
-    fetch("/api/budget/summary")
-      .then((r) => r.json())
-      .then(setSummary);
-  }, []);
+  const isInitialLoad = useRef(true);
 
   useEffect(() => {
+    if (isInitialLoad.current) {
+      isInitialLoad.current = false;
+      fetchData();
+      return;
+    }
     const timer = setTimeout(fetchData, 300);
     return () => clearTimeout(timer);
   }, [fetchData]);
@@ -80,6 +81,8 @@ export default function HomePage() {
     setCenter(val);
     setPage(1);
   };
+
+  const summary = data?.summary;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
