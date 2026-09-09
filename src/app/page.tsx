@@ -95,8 +95,8 @@ export default function HomePage() {
         </div>
       </div>
 
-      {summary && (
-        <div className="mb-6">
+      <div className="mb-6">
+        {summary ? (
           <SummaryCards
             totalBudget={summary.totalBudget}
             totalSpent={summary.totalSpent}
@@ -104,13 +104,23 @@ export default function HomePage() {
             filteredBudget={data?.totalBudget}
             filteredItems={data?.total}
           />
-        </div>
-      )}
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-24 mb-2" />
+                <div className="h-7 bg-gray-200 rounded w-36 mb-1" />
+                <div className="h-3 bg-gray-100 rounded w-16 mt-1" />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Fund breakdown */}
-      {summary && (
-        <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {summary.byFund.map((f) => (
+      <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {summary ? (
+          summary.byFund.map((f) => (
             <button
               key={f.fund}
               onClick={() => handleFundChange(fund === f.fund ? "" : f.fund)}
@@ -127,11 +137,19 @@ export default function HomePage() {
                   maximumFractionDigits: 0,
                 }).format(f.total)}
               </p>
-              <p className="text-xs text-gray-400">{f.count} items</p>
+              <p className="text-xs text-gray-500">{f.count} items</p>
             </button>
-          ))}
-        </div>
-      )}
+          ))
+        ) : (
+          [...Array(6)].map((_, i) => (
+            <div key={i} className="p-3 rounded-lg border border-gray-200 bg-white animate-pulse">
+              <div className="h-3 bg-gray-200 rounded w-12 mb-2" />
+              <div className="h-4 bg-gray-200 rounded w-20 mb-1" />
+              <div className="h-3 bg-gray-100 rounded w-14" />
+            </div>
+          ))
+        )}
+      </div>
 
       <div className="mb-6">
         <SearchFilters

@@ -118,7 +118,7 @@ export default function UploadHistoryPage() {
                     <div className="flex items-center gap-3 text-sm text-gray-500 flex-wrap">
                       <span>{upload.rows_imported} rows imported</span>
                       <span>·</span>
-                      <span className={upload.linked_items > 0 ? "text-green-600 font-medium" : "text-gray-400"}>
+                      <span className={upload.linked_items > 0 ? "text-green-600 font-medium" : "text-gray-500"}>
                         {upload.linked_items} budget items
                       </span>
                       {upload.linked_pos > 0 && (
@@ -200,7 +200,7 @@ export default function UploadHistoryPage() {
                               </p>
                             )}
                           </div>
-                          <span className="text-xs text-gray-400 whitespace-nowrap">
+                          <span className="text-xs text-gray-500 whitespace-nowrap">
                             {log.created_at}
                           </span>
                         </div>

@@ -69,7 +69,7 @@ export default function UploadPage() {
                 {file ? file.name : "Click to select Excel file"}
               </p>
               {file && (
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-gray-500 mt-1">
                   {(file.size / 1024).toFixed(1)} KB
                 </p>
               )}

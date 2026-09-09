@@ -84,7 +84,7 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-xl leading-none p-1"
+            className="text-gray-500 hover:text-gray-600 text-xl leading-none p-1"
           >
             &times;
           </button>
@@ -194,7 +194,7 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
                 </table>
               </div>
             ) : (
-              <p className="text-center py-8 text-gray-400">
+              <p className="text-center py-8 text-gray-500">
                 No purchase orders found
               </p>
             )
@@ -244,7 +244,7 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
               </table>
             </div>
           ) : (
-            <p className="text-center py-8 text-gray-400">
+            <p className="text-center py-8 text-gray-500">
               No vouchers found
             </p>
           )}

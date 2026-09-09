@@ -385,7 +385,7 @@ export default function POReportPage() {
                         <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${fundColors[item.fund_code] || "bg-gray-100 text-gray-800"}`}>
                           {item.fund_code}
                         </span>
-                        <span className="text-xs text-gray-400">{item.po_create_date}</span>
+                        <span className="text-xs text-gray-500">{item.po_create_date}</span>
                       </div>
                       <span className="text-base font-mono font-bold text-gray-900">
                         {Number(item.total).toLocaleString("en-US", { minimumFractionDigits: 2 })}
@@ -394,9 +394,9 @@ export default function POReportPage() {
                     <p className="text-sm font-medium text-gray-900 mb-1">{item.supplier}</p>
                     <p className="text-xs text-gray-500 mb-2">{item.po_remarks}</p>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
-                      <span><span className="text-gray-400">PO:</span> <span className="font-mono">{item.po_full}</span></span>
-                      <span><span className="text-gray-400">GL:</span> <span className="font-mono">{item.gl_code}</span></span>
-                      <span><span className="text-gray-400">Activity:</span> {item.activity_detail}</span>
+                      <span><span className="text-gray-500">PO:</span> <span className="font-mono">{item.po_full}</span></span>
+                      <span><span className="text-gray-500">GL:</span> <span className="font-mono">{item.gl_code}</span></span>
+                      <span><span className="text-gray-500">Activity:</span> {item.activity_detail}</span>
                     </div>
                   </div>
                 </div>

@@ -35,6 +35,7 @@ export default function SearchFilters({
       <select
         value={fund}
         onChange={(e) => onFundChange(e.target.value)}
+        aria-label="Filter by fund"
         className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm bg-white"
       >
         <option value="">All Funds</option>
@@ -47,6 +48,7 @@ export default function SearchFilters({
       <select
         value={center}
         onChange={(e) => onCenterChange(e.target.value)}
+        aria-label="Filter by center"
         className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm bg-white"
       >
         <option value="">All Centers</option>

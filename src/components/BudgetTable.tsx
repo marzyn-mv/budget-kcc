@@ -116,7 +116,7 @@ export default function BudgetTable({
                       className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                     />
                   )}
-                  <span className="text-xs text-gray-400">#{idx + 1}</span>
+                  <span className="text-xs text-gray-500">#{idx + 1}</span>
                   <span
                     className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${fundColors[item.fund] || "bg-gray-100 text-gray-800"}`}
                   >
@@ -132,15 +132,15 @@ export default function BudgetTable({
               </p>
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
                 <span>
-                  <span className="text-gray-400">Prog:</span>{" "}
+                  <span className="text-gray-500">Prog:</span>{" "}
                   <span className="font-mono">{item.prog}</span>
                 </span>
                 <span>
-                  <span className="text-gray-400">GL:</span>{" "}
+                  <span className="text-gray-500">GL:</span>{" "}
                   <span className="font-mono">{item.gl_code}</span>
                 </span>
                 <span>
-                  <span className="text-gray-400">Center:</span> {item.center_name}
+                  <span className="text-gray-500">Center:</span> {item.center_name}
                 </span>
               </div>
               {showExpenses && (
@@ -274,7 +274,7 @@ export default function BudgetTable({
                       />
                     </td>
                   )}
-                  <td className="px-2 py-2.5 text-xs text-gray-400">{idx + 1}</td>
+                  <td className="px-2 py-2.5 text-xs text-gray-500">{idx + 1}</td>
                   <td className="px-2 py-2.5">
                     <span
                       className={`inline-block px-1.5 py-0.5 text-[11px] font-medium rounded-full whitespace-nowrap ${fundColors[item.fund] || "bg-gray-100 text-gray-800"}`}
