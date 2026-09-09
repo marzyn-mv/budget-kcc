@@ -1,13 +1,21 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard,
+  DollarSign,
+  Upload,
+  FolderOpen,
+  ScrollText,
+  LogOut,
+} from "lucide-react";
 
 const navItems = [
-  { href: "/admin", label: "Dashboard", icon: "📊" },
-  { href: "/admin/expense", label: "Expense", icon: "💰" },
-  { href: "/admin/upload", label: "Upload Excel", icon: "📤" },
-  { href: "/admin/uploads", label: "Uploads", icon: "📁" },
-  { href: "/admin/logs", label: "Logs", icon: "📋" },
+  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/expense", label: "Expense", icon: DollarSign },
+  { href: "/admin/upload", label: "Upload Excel", icon: Upload },
+  { href: "/admin/uploads", label: "Uploads", icon: FolderOpen },
+  { href: "/admin/logs", label: "Logs", icon: ScrollText },
 ];
 
 interface Props {
@@ -38,7 +46,7 @@ export default function AdminSidebar({ onLogout }: Props) {
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   }`}
                 >
-                  <span className="text-base">{item.icon}</span>
+                  <item.icon className="w-4 h-4" />
                   {item.label}
                 </a>
               );
@@ -49,7 +57,7 @@ export default function AdminSidebar({ onLogout }: Props) {
               onClick={onLogout}
               className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition"
             >
-              <span className="text-base">🚪</span>
+              <LogOut className="w-4 h-4" />
               Logout
             </button>
           </div>
@@ -76,7 +84,7 @@ export default function AdminSidebar({ onLogout }: Props) {
                     : "text-gray-500"
                 }`}
               >
-                <span className="text-lg">{item.icon}</span>
+                <item.icon className="w-5 h-5" />
                 {item.label}
               </a>
             );
@@ -85,7 +93,7 @@ export default function AdminSidebar({ onLogout }: Props) {
             onClick={onLogout}
             className="flex flex-col items-center gap-0.5 px-2 py-1 text-xs text-gray-500 rounded-lg transition"
           >
-            <span className="text-lg">🚪</span>
+            <LogOut className="w-5 h-5" />
             Logout
           </button>
         </div>

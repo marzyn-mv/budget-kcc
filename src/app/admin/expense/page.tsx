@@ -1,5 +1,7 @@
 "use client";
 
+import { ClipboardList, Receipt } from "lucide-react";
+
 export default function ExpensePage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -15,8 +17,8 @@ export default function ExpensePage() {
           href="/admin/expense/po-report"
           className="bg-white rounded-xl border border-gray-200 p-6 hover:border-blue-300 hover:shadow-md transition"
         >
-          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-700 text-lg mb-3">
-            📋
+          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-700 mb-3">
+            <ClipboardList className="w-5 h-5" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-1">
             PO Detailed Report
@@ -30,8 +32,8 @@ export default function ExpensePage() {
           href="/admin/expense/voucher-report"
           className="bg-white rounded-xl border border-gray-200 p-6 hover:border-blue-300 hover:shadow-md transition"
         >
-          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center text-purple-700 text-lg mb-3">
-            🧾
+          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center text-purple-700 mb-3">
+            <Receipt className="w-5 h-5" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-1">
             Voucher Detailed Report
