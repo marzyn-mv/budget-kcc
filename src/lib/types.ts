@@ -10,6 +10,8 @@ export interface BudgetItem {
   budget: string;
   po_spent: number;
   voucher_spent: number;
+  acr_spent: number;
+  budget_control: number;
   created_at: string;
   updated_at: string;
 }
@@ -78,6 +80,51 @@ export interface VoucherReport {
   po: string;
   cheque_no: string;
   pay_by: string;
+  created_at: string;
+}
+
+export interface ACRReport {
+  id: number;
+  upload_id: number;
+  island_name: string;
+  produce_date: string;
+  budget_year: string;
+  gl_code: string;
+  voucher_full: string;
+  total: number;
+  remarks: string;
+  biz_area: string;
+  cost_center: string;
+  fund_code: string;
+  functional_area: string;
+  activity_detail: string;
+  center_name: string;
+  authorisation: string;
+  printed: string;
+  cancelled: string;
+  cancellation_reason: string;
+  deposited: string;
+  created_at: string;
+}
+
+export interface BudgetControl {
+  id: number;
+  upload_id: number;
+  group_id: number;
+  office_name: string;
+  created_date: string;
+  budget_control_date: string;
+  budget_control_no: string;
+  amount: number;
+  cr_fund: string;
+  cr_center: string;
+  cr_activity: string;
+  cr_gl_code: string;
+  dr_fund: string;
+  dr_center: string;
+  dr_activity: string;
+  dr_gl_code: string;
+  uploaded_file: string;
   created_at: string;
 }
 

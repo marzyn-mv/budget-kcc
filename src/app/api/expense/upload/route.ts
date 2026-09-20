@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
-    if (!type || !["po-report", "voucher-report"].includes(type)) {
+    if (!type || !["po-report", "voucher-report", "acr-report", "budget-control"].includes(type)) {
       return NextResponse.json({ error: "Invalid report type" }, { status: 400 });
     }
 
@@ -40,7 +40,92 @@ export async function POST(req: NextRequest) {
     );
     const uploadId = uploadResult.rows[0].id;
 
-    if (type === "po-report") {
+    if (type === "budget-control") {
+      const excelDateToStr = (v: unknown): string => {
+        if (!v) return "";
+        const num = Number(v);
+        if (!isNaN(num) && num > 10000) {
+          const d = new Date((num - 25569) * 86400 * 1000);
+          return d.toISOString().split("T")[0];
+        }
+        return String(v);
+      };
+
+      for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+        const batch = rows.slice(i, i + BATCH_SIZE);
+        const values: string[] = [];
+        const params: (string | number)[] = [];
+        let idx = 1;
+
+        for (const row of batch) {
+          values.push(`($${idx},$${idx+1},$${idx+2},$${idx+3},$${idx+4},$${idx+5},$${idx+6},$${idx+7},$${idx+8},$${idx+9},$${idx+10},$${idx+11},$${idx+12},$${idx+13},$${idx+14},$${idx+15})`);
+          params.push(
+            uploadId,
+            Number(row.groupID) || 0,
+            String(row.OfficeName || ""),
+            excelDateToStr(row["Created Date"]),
+            excelDateToStr(row["Budget Control Date"]),
+            String(row["Budget Control No"] || ""),
+            Number(row.Amount) || 0,
+            String(row["Cr/Add: Fund"] || ""),
+            String(row["Cr/Add: Business Center"] || ""),
+            String(row["Cr/Add: Activity"] || ""),
+            String(row["Cr/Add: GL Code"] || ""),
+            String(row["Dr/Minus: Fund"] || ""),
+            String(row["Dr/Minus: Business Center"] || ""),
+            String(row["Dr/Minus: Activity"] || ""),
+            String(row["Dr/Minus: GL Code"] || ""),
+            String(row["Uploaded File"] || ""),
+          );
+          idx += 16;
+        }
+
+        await query(
+          `INSERT INTO budget_controls (upload_id, group_id, office_name, created_date, budget_control_date, budget_control_no, amount, cr_fund, cr_center, cr_activity, cr_gl_code, dr_fund, dr_center, dr_activity, dr_gl_code, uploaded_file)
+           VALUES ${values.join(",")}`,
+          params
+        );
+      }
+    } else if (type === "acr-report") {
+      for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+        const batch = rows.slice(i, i + BATCH_SIZE);
+        const values: string[] = [];
+        const params: (string | number)[] = [];
+        let idx = 1;
+
+        for (const row of batch) {
+          values.push(`($${idx},$${idx+1},$${idx+2},$${idx+3},$${idx+4},$${idx+5},$${idx+6},$${idx+7},$${idx+8},$${idx+9},$${idx+10},$${idx+11},$${idx+12},$${idx+13},$${idx+14},$${idx+15},$${idx+16},$${idx+17},$${idx+18})`);
+          params.push(
+            uploadId,
+            String(row.IslandNameEng || ""),
+            String(row.ProduceDate || ""),
+            String(row.BudgetYear || ""),
+            String(row.GLcode || ""),
+            String(row.VoucherFull || ""),
+            Number(row.Amt) || 0,
+            String(row.Remarks || ""),
+            String(row.BizArea || ""),
+            String(row.costCenter || ""),
+            String(row.FundCode || ""),
+            String(row.FunctionalArea || ""),
+            String(row.ActivityDetail || ""),
+            String(row.CenterName || ""),
+            String(row.Authorisation || ""),
+            String(row.Printed || ""),
+            String(row.Cancelled || ""),
+            String(row.CancellationReason || ""),
+            String(row.Deposited || ""),
+          );
+          idx += 19;
+        }
+
+        await query(
+          `INSERT INTO acr_reports (upload_id, island_name, produce_date, budget_year, gl_code, voucher_full, total, remarks, biz_area, cost_center, fund_code, functional_area, activity_detail, center_name, authorisation, printed, cancelled, cancellation_reason, deposited)
+           VALUES ${values.join(",")}`,
+          params
+        );
+      }
+    } else if (type === "po-report") {
       for (let i = 0; i < rows.length; i += BATCH_SIZE) {
         const batch = rows.slice(i, i + BATCH_SIZE);
         const values: string[] = [];

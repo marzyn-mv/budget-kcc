@@ -16,12 +16,37 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "50");
     const offset = (page - 1) * limit;
 
-    const table = type === "voucher-report" ? "voucher_reports" : "po_reports";
+    const tableMap: Record<string, string> = {
+      "po-report": "po_reports",
+      "voucher-report": "voucher_reports",
+      "acr-report": "acr_reports",
+      "budget-control": "budget_controls",
+    };
+    const table = tableMap[type] || "po_reports";
+
+    const isBc = type === "budget-control";
 
     // Cache filter options — 1 hour
     const filters = await getCached(
       `expense:${type}:filters`,
       async () => {
+        if (isBc) {
+          const [crFundsR, drFundsR, crGlR, drGlR] = await Promise.all([
+            query(`SELECT DISTINCT cr_fund FROM budget_controls WHERE cr_fund != '' ORDER BY cr_fund`),
+            query(`SELECT DISTINCT dr_fund FROM budget_controls WHERE dr_fund != '' ORDER BY dr_fund`),
+            query(`SELECT DISTINCT cr_gl_code FROM budget_controls WHERE cr_gl_code != '' ORDER BY cr_gl_code`),
+            query(`SELECT DISTINCT dr_gl_code FROM budget_controls WHERE dr_gl_code != '' ORDER BY dr_gl_code`),
+          ]);
+          const allFunds = [...new Set([
+            ...crFundsR.rows.map((r) => (r as Record<string, string>).cr_fund),
+            ...drFundsR.rows.map((r) => (r as Record<string, string>).dr_fund),
+          ])].sort();
+          const allGl = [...new Set([
+            ...crGlR.rows.map((r) => (r as Record<string, string>).cr_gl_code),
+            ...drGlR.rows.map((r) => (r as Record<string, string>).dr_gl_code),
+          ])].sort();
+          return { funds: allFunds, glCodes: allGl, activities: [] as string[] };
+        }
         const [fundsR, glR, actR] = await Promise.all([
           query(`SELECT DISTINCT fund_code FROM ${table} ORDER BY fund_code`),
           query(`SELECT DISTINCT gl_code FROM ${table} ORDER BY gl_code`),
@@ -41,24 +66,46 @@ export async function GET(req: NextRequest) {
     let paramIndex = 1;
 
     if (search) {
-      conditions.push(
-        `(activity_detail ILIKE $${paramIndex} OR supplier ILIKE $${paramIndex + 1} OR gl_code ILIKE $${paramIndex + 2})`
-      );
+      if (isBc) {
+        conditions.push(
+          `(budget_control_no ILIKE $${paramIndex} OR cr_activity ILIKE $${paramIndex + 1} OR dr_activity ILIKE $${paramIndex + 2})`
+        );
+      } else if (type === "acr-report") {
+        conditions.push(
+          `(activity_detail ILIKE $${paramIndex} OR voucher_full ILIKE $${paramIndex + 1} OR gl_code ILIKE $${paramIndex + 2})`
+        );
+      } else {
+        conditions.push(
+          `(activity_detail ILIKE $${paramIndex} OR supplier ILIKE $${paramIndex + 1} OR gl_code ILIKE $${paramIndex + 2})`
+        );
+      }
       params.push(`%${search}%`, `%${search}%`, `%${search}%`);
       paramIndex += 3;
     }
     if (fund) {
-      conditions.push(`fund_code = $${paramIndex}`);
+      if (isBc) {
+        conditions.push(`(cr_fund = $${paramIndex} OR dr_fund = $${paramIndex})`);
+      } else {
+        conditions.push(`fund_code = $${paramIndex}`);
+      }
       params.push(fund);
       paramIndex++;
     }
     if (glCode) {
-      conditions.push(`gl_code = $${paramIndex}`);
+      if (isBc) {
+        conditions.push(`(cr_gl_code = $${paramIndex} OR dr_gl_code = $${paramIndex})`);
+      } else {
+        conditions.push(`gl_code = $${paramIndex}`);
+      }
       params.push(glCode);
       paramIndex++;
     }
     if (activity) {
-      conditions.push(`activity_detail = $${paramIndex}`);
+      if (isBc) {
+        conditions.push(`(cr_activity = $${paramIndex} OR dr_activity = $${paramIndex})`);
+      } else {
+        conditions.push(`activity_detail = $${paramIndex}`);
+      }
       params.push(activity);
       paramIndex++;
     }
@@ -67,9 +114,10 @@ export async function GET(req: NextRequest) {
 
     // Run count+sum and items in parallel
     const showAll = limit <= 0;
+    const sumCol = isBc ? "amount" : "total";
     const [countSumResult, items] = await Promise.all([
       query<{ count: string; total: string }>(
-        `SELECT COUNT(*) as count, COALESCE(SUM(total), 0) as total FROM ${table} ${where}`,
+        `SELECT COUNT(*) as count, COALESCE(SUM(${sumCol}), 0) as total FROM ${table} ${where}`,
         params
       ),
       showAll
@@ -113,12 +161,24 @@ export async function DELETE(req: NextRequest) {
 
   try {
     const { type, ids } = await req.json();
-    if (!type || !["po-report", "voucher-report"].includes(type)) {
+    if (!type || !["po-report", "voucher-report", "acr-report", "budget-control"].includes(type)) {
       return NextResponse.json({ error: "Invalid type" }, { status: 400 });
     }
 
-    const table = type === "voucher-report" ? "voucher_reports" : "po_reports";
-    const label = type === "voucher-report" ? "voucher" : "PO";
+    const deleteTableMap: Record<string, string> = {
+      "po-report": "po_reports",
+      "voucher-report": "voucher_reports",
+      "acr-report": "acr_reports",
+      "budget-control": "budget_controls",
+    };
+    const table = deleteTableMap[type] || "po_reports";
+    const labelMap: Record<string, string> = {
+      "po-report": "PO",
+      "voucher-report": "voucher",
+      "acr-report": "ACR",
+      "budget-control": "budget control",
+    };
+    const label = labelMap[type] || "PO";
     const deleteByIds = Array.isArray(ids) && ids.length > 0;
 
     if (deleteByIds) {
@@ -165,7 +225,9 @@ export async function DELETE(req: NextRequest) {
           LEFT JOIN budget_items bi ON bi.upload_id = uh.id
           LEFT JOIN po_reports po ON po.upload_id = uh.id
           LEFT JOIN voucher_reports vr ON vr.upload_id = uh.id
-          WHERE bi.id IS NULL AND po.id IS NULL AND vr.id IS NULL
+          LEFT JOIN acr_reports ar ON ar.upload_id = uh.id
+          LEFT JOIN budget_controls bc ON bc.upload_id = uh.id
+          WHERE bi.id IS NULL AND po.id IS NULL AND vr.id IS NULL AND ar.id IS NULL AND bc.id IS NULL
         )`
       );
       await client.query("COMMIT");

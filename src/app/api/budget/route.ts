@@ -33,7 +33,8 @@ async function fetchSummary() {
         sql`
           SELECT COALESCE(
             COALESCE((SELECT SUM(total) FROM po_reports), 0) +
-            COALESCE((SELECT SUM(total) FROM voucher_reports), 0),
+            COALESCE((SELECT SUM(total) FROM voucher_reports), 0) +
+            COALESCE((SELECT SUM(total) FROM acr_reports), 0),
           0) as total_spent
         `,
         sql`
@@ -142,7 +143,8 @@ async function fetchList(
         };
       });
 
-      const spentMap = new Map<string, { po: number; voucher: number }>();
+      const spentMap = new Map<string, { po: number; voucher: number; acr: number }>();
+      const bcMap = new Map<string, number>();
 
       if (keys.length > 0) {
         const uniqueKeys = [...new Map(keys.map((k) => [
@@ -159,7 +161,20 @@ async function fetchList(
 
         const valuesClause = valuesPlaceholders.join(", ");
 
-        const [poSpent, voucherSpent] = await Promise.all([
+        const uniqueActivityGl = [...new Map(keys.map((k) => [
+          `${k.activity_detail}|${k.gl_code}`, { activity: k.activity_detail, gl_code: k.gl_code }
+        ])).values()];
+
+        const agPlaceholders: string[] = [];
+        const agParams: string[] = [];
+        uniqueActivityGl.forEach((k, i) => {
+          const base = i * 2;
+          agPlaceholders.push(`($${base + 1}, $${base + 2})`);
+          agParams.push(k.activity, k.gl_code);
+        });
+        const agClause = agPlaceholders.join(", ");
+
+        const [poSpent, voucherSpent, acrSpent] = await Promise.all([
           query<{ gl_code: string; activity_detail: string; fund_code: string; total: string }>(
             `SELECT gl_code, activity_detail, fund_code, COALESCE(SUM(total), 0) as total
              FROM po_reports
@@ -174,30 +189,73 @@ async function fetchList(
              GROUP BY gl_code, activity_detail, fund_code`,
             valuesParams
           ),
+          query<{ gl_code: string; activity_detail: string; fund_code: string; total: string }>(
+            `SELECT gl_code, activity_detail, fund_code, COALESCE(SUM(total), 0) as total
+             FROM acr_reports
+             WHERE (gl_code, activity_detail, fund_code) IN (${valuesClause})
+             GROUP BY gl_code, activity_detail, fund_code`,
+            valuesParams
+          ),
         ]);
 
         for (const r of poSpent.rows) {
           const key = `${r.gl_code}|${r.activity_detail}|${r.fund_code}`;
-          const entry = spentMap.get(key) || { po: 0, voucher: 0 };
+          const entry = spentMap.get(key) || { po: 0, voucher: 0, acr: 0 };
           entry.po = parseFloat(r.total);
           spentMap.set(key, entry);
         }
         for (const r of voucherSpent.rows) {
           const key = `${r.gl_code}|${r.activity_detail}|${r.fund_code}`;
-          const entry = spentMap.get(key) || { po: 0, voucher: 0 };
+          const entry = spentMap.get(key) || { po: 0, voucher: 0, acr: 0 };
           entry.voucher = parseFloat(r.total);
           spentMap.set(key, entry);
+        }
+        for (const r of acrSpent.rows) {
+          const key = `${r.gl_code}|${r.activity_detail}|${r.fund_code}`;
+          const entry = spentMap.get(key) || { po: 0, voucher: 0, acr: 0 };
+          entry.acr = parseFloat(r.total);
+          spentMap.set(key, entry);
+        }
+
+        // Budget controls: credit side adds, debit side subtracts
+        const [bcCredits, bcDebits] = await Promise.all([
+          query<{ cr_activity: string; cr_gl_code: string; total: string }>(
+            `SELECT cr_activity, cr_gl_code, COALESCE(SUM(amount), 0) as total
+             FROM budget_controls
+             WHERE (cr_activity, cr_gl_code) IN (${agClause})
+             GROUP BY cr_activity, cr_gl_code`,
+            agParams
+          ),
+          query<{ dr_activity: string; dr_gl_code: string; total: string }>(
+            `SELECT dr_activity, dr_gl_code, COALESCE(SUM(amount), 0) as total
+             FROM budget_controls
+             WHERE (dr_activity, dr_gl_code) IN (${agClause})
+             GROUP BY dr_activity, dr_gl_code`,
+            agParams
+          ),
+        ]);
+
+        for (const r of bcCredits.rows) {
+          const key = `${r.cr_activity}|${r.cr_gl_code}`;
+          bcMap.set(key, (bcMap.get(key) || 0) + parseFloat(r.total));
+        }
+        for (const r of bcDebits.rows) {
+          const key = `${r.dr_activity}|${r.dr_gl_code}`;
+          bcMap.set(key, (bcMap.get(key) || 0) - parseFloat(r.total));
         }
       }
 
       const rows = itemsResult.rows.map((r) => {
         const row = r as Record<string, unknown>;
         const key = `${row.gl_code}|${row.activity_detail}|${row.fund}`;
-        const spent = spentMap.get(key) || { po: 0, voucher: 0 };
+        const spent = spentMap.get(key) || { po: 0, voucher: 0, acr: 0 };
+        const bcKey = `${row.activity_detail}|${row.gl_code}`;
         return {
           ...r,
           po_spent: spent.po,
           voucher_spent: spent.voucher,
+          acr_spent: spent.acr,
+          budget_control: bcMap.get(bcKey) || 0,
         };
       });
 

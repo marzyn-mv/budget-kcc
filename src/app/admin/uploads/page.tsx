@@ -11,6 +11,8 @@ interface Upload {
   linked_items: number;
   linked_pos: number;
   linked_vouchers: number;
+  linked_acrs: number;
+  linked_bcs: number;
   related_logs: number;
 }
 
@@ -137,6 +139,22 @@ export default function UploadHistoryPage() {
                           </span>
                         </>
                       )}
+                      {upload.linked_acrs > 0 && (
+                        <>
+                          <span>·</span>
+                          <span className="text-orange-600 font-medium">
+                            {upload.linked_acrs} ACRs
+                          </span>
+                        </>
+                      )}
+                      {upload.linked_bcs > 0 && (
+                        <>
+                          <span>·</span>
+                          <span className="text-teal-600 font-medium">
+                            {upload.linked_bcs} BCs
+                          </span>
+                        </>
+                      )}
                       <span>·</span>
                       <span>{upload.uploaded_at}</span>
                       <span>·</span>
@@ -229,7 +247,7 @@ export default function UploadHistoryPage() {
               This will permanently delete the upload record for{" "}
               <strong className="text-gray-900">{deleteConfirm.filename}</strong>.
             </p>
-            {(deleteConfirm.linked_items > 0 || deleteConfirm.linked_pos > 0 || deleteConfirm.linked_vouchers > 0) && (
+            {(deleteConfirm.linked_items > 0 || deleteConfirm.linked_pos > 0 || deleteConfirm.linked_vouchers > 0 || deleteConfirm.linked_acrs > 0 || deleteConfirm.linked_bcs > 0) && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
                 <p className="text-sm text-red-700 font-medium mb-1">
                   Warning: This will also delete:
@@ -243,6 +261,12 @@ export default function UploadHistoryPage() {
                   )}
                   {deleteConfirm.linked_vouchers > 0 && (
                     <li>{deleteConfirm.linked_vouchers} voucher report{deleteConfirm.linked_vouchers !== 1 ? "s" : ""}</li>
+                  )}
+                  {deleteConfirm.linked_acrs > 0 && (
+                    <li>{deleteConfirm.linked_acrs} ACR report{deleteConfirm.linked_acrs !== 1 ? "s" : ""}</li>
+                  )}
+                  {deleteConfirm.linked_bcs > 0 && (
+                    <li>{deleteConfirm.linked_bcs} budget control{deleteConfirm.linked_bcs !== 1 ? "s" : ""}</li>
                   )}
                 </ul>
               </div>

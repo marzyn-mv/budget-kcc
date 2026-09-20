@@ -54,6 +54,30 @@ async function ensureTables() {
     await sql`CREATE INDEX IF NOT EXISTS idx_voucher_activity ON voucher_reports(activity_detail)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_voucher_match ON voucher_reports(gl_code, activity_detail, fund_code)`;
 
+    await sql`CREATE TABLE IF NOT EXISTS acr_reports (
+      id SERIAL PRIMARY KEY, upload_id INTEGER, island_name TEXT, produce_date TEXT,
+      budget_year TEXT, gl_code TEXT NOT NULL, voucher_full TEXT, total NUMERIC DEFAULT 0,
+      remarks TEXT, biz_area TEXT, cost_center TEXT, fund_code TEXT NOT NULL,
+      functional_area TEXT, activity_detail TEXT NOT NULL, center_name TEXT,
+      authorisation TEXT, printed TEXT, cancelled TEXT, cancellation_reason TEXT,
+      deposited TEXT, created_at TIMESTAMP DEFAULT NOW())`;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_acr_gl ON acr_reports(gl_code)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_acr_fund ON acr_reports(fund_code)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_acr_activity ON acr_reports(activity_detail)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_acr_match ON acr_reports(gl_code, activity_detail, fund_code)`;
+
+    await sql`CREATE TABLE IF NOT EXISTS budget_controls (
+      id SERIAL PRIMARY KEY, upload_id INTEGER, group_id INTEGER, office_name TEXT,
+      created_date TEXT, budget_control_date TEXT, budget_control_no TEXT,
+      amount NUMERIC DEFAULT 0,
+      cr_fund TEXT, cr_center TEXT, cr_activity TEXT, cr_gl_code TEXT,
+      dr_fund TEXT, dr_center TEXT, dr_activity TEXT, dr_gl_code TEXT,
+      uploaded_file TEXT, created_at TIMESTAMP DEFAULT NOW())`;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_bc_cr ON budget_controls(cr_activity, cr_gl_code)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_bc_dr ON budget_controls(dr_activity, dr_gl_code)`;
+
     initialized = true;
   })();
 

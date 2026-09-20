@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const [poResult, voucherResult] = await Promise.all([
+    const [poResult, voucherResult, acrResult, bcResult] = await Promise.all([
       query(
         `SELECT id, po_create_date, po_full, supplier, total, po_remarks, cancelled
          FROM po_reports
@@ -31,6 +31,22 @@ export async function GET(req: NextRequest) {
          ORDER BY produce_date DESC`,
         [gl_code, activity, fund]
       ),
+      query(
+        `SELECT id, produce_date, voucher_full, total, remarks, cancelled
+         FROM acr_reports
+         WHERE gl_code = $1 AND activity_detail = $2 AND fund_code = $3
+         ORDER BY produce_date DESC`,
+        [gl_code, activity, fund]
+      ),
+      query(
+        `SELECT id, budget_control_date, budget_control_no, amount, cr_gl_code, dr_gl_code,
+                cr_activity, dr_activity,
+                CASE WHEN cr_activity = $2 AND cr_gl_code = $1 THEN 'credit' ELSE 'debit' END as side
+         FROM budget_controls
+         WHERE (cr_activity = $2 AND cr_gl_code = $1) OR (dr_activity = $2 AND dr_gl_code = $1)
+         ORDER BY budget_control_date DESC`,
+        [gl_code, activity]
+      ),
     ]);
 
     const poTotal = poResult.rows.reduce(
@@ -41,13 +57,35 @@ export async function GET(req: NextRequest) {
       (sum, r) => sum + parseFloat(String(r.total) || "0"),
       0
     );
+    const acrTotal = acrResult.rows.reduce(
+      (sum, r) => sum + parseFloat(String(r.total) || "0"),
+      0
+    );
+
+    const bcItems = bcResult.rows.map((r) => {
+      const row = r as Record<string, unknown>;
+      return {
+        ...r,
+        effect: row.side === "credit"
+          ? parseFloat(String(row.amount) || "0")
+          : -parseFloat(String(row.amount) || "0"),
+      };
+    });
+    const bcNet = bcItems.reduce(
+      (sum, r) => sum + (r.effect as number),
+      0
+    );
 
     return NextResponse.json({
       poTotal,
       voucherTotal,
-      totalExpense: poTotal + voucherTotal,
+      acrTotal,
+      bcNet,
+      totalExpense: poTotal + voucherTotal + acrTotal,
       poItems: poResult.rows,
       voucherItems: voucherResult.rows,
+      acrItems: acrResult.rows,
+      bcItems,
     });
   } catch (error) {
     logger.error("Failed to fetch expense details", { error });

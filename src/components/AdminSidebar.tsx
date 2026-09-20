@@ -8,12 +8,14 @@ import {
   FolderOpen,
   ScrollText,
   LogOut,
+  ArrowLeftRight,
 } from "lucide-react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/expense", label: "Expense", icon: DollarSign },
-  { href: "/admin/upload", label: "Upload Excel", icon: Upload },
+  { href: "/admin/budget-control", label: "Budget Control", icon: ArrowLeftRight },
+  { href: "/admin/upload", label: "Upload Budget", icon: Upload },
   { href: "/admin/uploads", label: "Uploads", icon: FolderOpen },
   { href: "/admin/logs", label: "Logs", icon: ScrollText },
 ];
