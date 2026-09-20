@@ -249,7 +249,7 @@ export default function BudgetTable({
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {items.map((item, idx) => {
-              const budget = parseBudget(item.budget);
+              const budget = parseBudget(item.budget) + (item.budget_control || 0);
               const spent = (item.po_spent || 0) + (item.voucher_spent || 0) + (item.acr_spent || 0);
               const remaining = budget - spent;
 

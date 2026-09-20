@@ -17,7 +17,8 @@ export async function GET() {
           sql`
             SELECT COALESCE(
               COALESCE((SELECT SUM(total) FROM po_reports), 0) +
-              COALESCE((SELECT SUM(total) FROM voucher_reports), 0),
+              COALESCE((SELECT SUM(total) FROM voucher_reports), 0) +
+              COALESCE((SELECT SUM(total) FROM acr_reports), 0),
             0) as total_spent
           `,
           sql`
