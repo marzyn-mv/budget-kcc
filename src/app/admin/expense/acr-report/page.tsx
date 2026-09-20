@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Pagination from "@/components/Pagination";
+import UploadProgress from "@/components/UploadProgress";
 
 interface ACRItem {
   id: number;
@@ -261,27 +262,7 @@ export default function ACRReportPage() {
           {message && <span className="text-sm text-green-600">{message}</span>}
           {error && <span className="text-sm text-red-600">{error}</span>}
         </form>
-        {uploading && (
-          <div className="mt-3">
-            <p className="text-xs text-gray-500 mb-1">Processing file...</p>
-            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-              <div
-                className="h-3 rounded-full bg-gradient-to-r from-blue-500 via-blue-400 to-blue-500"
-                style={{
-                  width: "40%",
-                  animation: "progress-slide 1.5s ease-in-out infinite",
-                }}
-              />
-            </div>
-            <style>{`
-              @keyframes progress-slide {
-                0% { margin-left: 0; width: 30%; }
-                50% { margin-left: 40%; width: 50%; }
-                100% { margin-left: 0; width: 30%; }
-              }
-            `}</style>
-          </div>
-        )}
+        <UploadProgress active={uploading} />
       </div>
 
       {/* Filters */}
