@@ -13,12 +13,13 @@ export default function AdminPage() {
     total: number;
     totalPages: number;
     page: number;
-    filters: { funds: string[]; centers: string[] };
+    filters: { funds: string[]; centers: string[]; sections: string[] };
   } | null>(null);
 
   const [search, setSearch] = useState("");
   const [fund, setFund] = useState("");
   const [center, setCenter] = useState("");
+  const [section, setSection] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(25);
   const [editItem, setEditItem] = useState<BudgetItem | null>(null);
@@ -29,13 +30,14 @@ export default function AdminPage() {
     if (search) params.set("search", search);
     if (fund) params.set("fund", fund);
     if (center) params.set("center", center);
+    if (section) params.set("section", section);
     params.set("page", String(page));
     params.set("limit", String(limit));
 
     const res = await fetch(`/api/budget?${params}`);
     const json = await res.json();
     setData(json);
-  }, [search, fund, center, page, limit]);
+  }, [search, fund, center, section, page, limit]);
 
   useEffect(() => {
     const timer = setTimeout(fetchData, 300);
@@ -68,8 +70,10 @@ export default function AdminPage() {
           search={search}
           fund={fund}
           center={center}
+          section={section}
           funds={data?.filters.funds || []}
           centers={data?.filters.centers || []}
+          sections={data?.filters.sections || []}
           onSearchChange={(v) => {
             setSearch(v);
             setPage(1);
@@ -80,6 +84,10 @@ export default function AdminPage() {
           }}
           onCenterChange={(v) => {
             setCenter(v);
+            setPage(1);
+          }}
+          onSectionChange={(v) => {
+            setSection(v);
             setPage(1);
           }}
         />

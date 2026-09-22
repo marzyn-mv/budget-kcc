@@ -5,6 +5,7 @@ export interface BudgetItem {
   fund: string;
   activity_detail: string;
   prog: string;
+  section: string;
   center_name: string;
   gl_code: string;
   budget: string;
@@ -132,6 +133,7 @@ export interface BudgetFilters {
   search?: string;
   fund?: string;
   center?: string;
+  section?: string;
   page?: number;
   limit?: number;
 }

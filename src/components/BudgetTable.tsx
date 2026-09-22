@@ -135,12 +135,15 @@ export default function BudgetTable({
                   <span className="text-gray-500">Prog:</span>{" "}
                   <span className="font-mono">{item.prog}</span>
                 </span>
+                {item.section && (
+                  <span>
+                    <span className="text-gray-500">Section:</span>{" "}
+                    <span className="font-medium text-gray-700">{item.section}</span>
+                  </span>
+                )}
                 <span>
                   <span className="text-gray-500">GL:</span>{" "}
                   <span className="font-mono">{item.gl_code}</span>
-                </span>
-                <span>
-                  <span className="text-gray-500">Center:</span> {item.center_name}
                 </span>
               </div>
               {showExpenses && (
@@ -222,7 +225,7 @@ export default function BudgetTable({
                 Prog
               </th>
               <th className="px-2 py-2.5 text-left text-xs font-semibold text-gray-600 uppercase">
-                Center
+                Section
               </th>
               <th className="px-2 py-2.5 text-left text-xs font-semibold text-gray-600 uppercase">
                 GL
@@ -288,8 +291,8 @@ export default function BudgetTable({
                   <td className="px-2 py-2.5 text-xs text-gray-600 font-mono truncate">
                     {item.prog}
                   </td>
-                  <td className="px-2 py-2.5 text-xs text-gray-600 truncate" title={item.center_name}>
-                    {item.center_name}
+                  <td className="px-2 py-2.5 text-xs text-gray-600 truncate" title={item.section}>
+                    {item.section}
                   </td>
                   <td className="px-2 py-2.5 text-xs text-gray-600 font-mono">
                     {item.gl_code}

@@ -7,13 +7,15 @@ async function fetchFilters() {
   return getCached(
     "budget:filters",
     async () => {
-      const [fundsResult, centersResult] = await Promise.all([
+      const [fundsResult, centersResult, sectionsResult] = await Promise.all([
         sql`SELECT DISTINCT fund FROM budget_items ORDER BY fund`,
         sql`SELECT DISTINCT center_name FROM budget_items ORDER BY center_name`,
+        sql`SELECT DISTINCT section FROM budget_items WHERE section != '' ORDER BY section`,
       ]);
       return {
         funds: fundsResult.rows.map((f) => f.fund),
         centers: centersResult.rows.map((c) => c.center_name),
+        sections: sectionsResult.rows.map((s) => s.section),
       };
     },
     3600
@@ -75,11 +77,12 @@ async function fetchList(
   search: string,
   fund: string,
   center: string,
+  section: string,
   page: number,
   limit: number,
   offset: number
 ) {
-  const cacheKey = `budget:list:${search}|${fund}|${center}|${page}|${limit}`;
+  const cacheKey = `budget:list:${search}|${fund}|${center}|${section}|${page}|${limit}`;
 
   return getCached(
     cacheKey,
@@ -103,6 +106,11 @@ async function fetchList(
       if (center) {
         conditions.push(`center_name = $${paramIndex}`);
         params.push(center);
+        paramIndex++;
+      }
+      if (section) {
+        conditions.push(`section = $${paramIndex}`);
+        params.push(section);
         paramIndex++;
       }
 
@@ -280,6 +288,7 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get("search") || "";
     const fund = searchParams.get("fund") || "";
     const center = searchParams.get("center") || "";
+    const section = searchParams.get("section") || "";
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "50");
     const offset = (page - 1) * limit;
@@ -288,10 +297,10 @@ export async function GET(req: NextRequest) {
     const [filters, summary, list] = await Promise.all([
       fetchFilters(),
       fetchSummary(),
-      fetchList(search, fund, center, page, limit, offset),
+      fetchList(search, fund, center, section, page, limit, offset),
     ]);
 
-    logger.info("Budget data fetched", { search, fund, center, page });
+    logger.info("Budget data fetched", { search, fund, center, section, page });
 
     return NextResponse.json({
       ...list,

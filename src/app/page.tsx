@@ -26,6 +26,7 @@ interface BudgetResponse {
   filters: {
     funds: string[];
     centers: string[];
+    sections: string[];
   };
   summary: SummaryData;
 }
@@ -35,6 +36,7 @@ export default function HomePage() {
   const [search, setSearch] = useState("");
   const [fund, setFund] = useState("");
   const [center, setCenter] = useState("");
+  const [section, setSection] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(25);
   const [loading, setLoading] = useState(true);
@@ -46,6 +48,7 @@ export default function HomePage() {
     if (search) params.set("search", search);
     if (fund) params.set("fund", fund);
     if (center) params.set("center", center);
+    if (section) params.set("section", section);
     params.set("page", String(page));
     params.set("limit", String(limit));
 
@@ -53,7 +56,7 @@ export default function HomePage() {
     const json = await res.json();
     setData(json);
     setLoading(false);
-  }, [search, fund, center, page, limit]);
+  }, [search, fund, center, section, page, limit]);
 
   const isInitialLoad = useRef(true);
 
@@ -79,6 +82,11 @@ export default function HomePage() {
 
   const handleCenterChange = (val: string) => {
     setCenter(val);
+    setPage(1);
+  };
+
+  const handleSectionChange = (val: string) => {
+    setSection(val);
     setPage(1);
   };
 
@@ -159,11 +167,14 @@ export default function HomePage() {
           search={search}
           fund={fund}
           center={center}
+          section={section}
           funds={data?.filters.funds || []}
           centers={data?.filters.centers || []}
+          sections={data?.filters.sections || []}
           onSearchChange={handleSearchChange}
           onFundChange={handleFundChange}
           onCenterChange={handleCenterChange}
+          onSectionChange={handleSectionChange}
         />
       </div>
 

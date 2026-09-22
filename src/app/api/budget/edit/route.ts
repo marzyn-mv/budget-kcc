@@ -13,7 +13,7 @@ export async function PUT(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { id, fund, activity_detail, prog, center_name, gl_code, budget } =
+    const { id, fund, activity_detail, prog, section, center_name, gl_code, budget } =
       body;
 
     if (!id) {
@@ -33,6 +33,7 @@ export async function PUT(req: NextRequest) {
         fund = COALESCE(${fund || null}, fund),
         activity_detail = COALESCE(${activity_detail || null}, activity_detail),
         prog = COALESCE(${prog || null}, prog),
+        section = COALESCE(${section || null}, section),
         center_name = COALESCE(${center_name || null}, center_name),
         gl_code = COALESCE(${gl_code || null}, gl_code),
         budget = COALESCE(${budget || null}, budget),

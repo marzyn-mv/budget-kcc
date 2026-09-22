@@ -4,22 +4,28 @@ interface Props {
   search: string;
   fund: string;
   center: string;
+  section: string;
   funds: string[];
   centers: string[];
+  sections: string[];
   onSearchChange: (val: string) => void;
   onFundChange: (val: string) => void;
   onCenterChange: (val: string) => void;
+  onSectionChange: (val: string) => void;
 }
 
 export default function SearchFilters({
   search,
   fund,
   center,
+  section,
   funds,
   centers,
+  sections,
   onSearchChange,
   onFundChange,
   onCenterChange,
+  onSectionChange,
 }: Props) {
   return (
     <div className="flex flex-col sm:flex-row gap-3">
@@ -42,6 +48,19 @@ export default function SearchFilters({
         {funds.map((f) => (
           <option key={f} value={f}>
             {f}
+          </option>
+        ))}
+      </select>
+      <select
+        value={section}
+        onChange={(e) => onSectionChange(e.target.value)}
+        aria-label="Filter by section"
+        className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm bg-white"
+      >
+        <option value="">All Sections</option>
+        {sections.map((s) => (
+          <option key={s} value={s}>
+            {s}
           </option>
         ))}
       </select>

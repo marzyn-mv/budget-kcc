@@ -23,11 +23,20 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
     const workbook = XLSX.read(buffer);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
+    const rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
 
-    if (rows.length === 0) {
+    if (rawRows.length === 0) {
       return NextResponse.json({ error: "Empty file" }, { status: 400 });
     }
+
+    // Normalize column names: trim whitespace from keys
+    const rows = rawRows.map((raw) => {
+      const normalized: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(raw)) {
+        normalized[key.trim()] = value;
+      }
+      return normalized;
+    });
 
     const pool = await getPool();
     const client = await pool.connect();
@@ -41,21 +50,37 @@ export async function POST(req: NextRequest) {
       );
       const uploadId = uploadResult.rows[0].id;
 
-      for (const row of rows) {
+      // Parse all rows into values
+      const parsed = rows.map((row) => [
+        uploadId,
+        String(row["Fund"] ?? "").trim(),
+        String(row["Activity Detail"] ?? row["ActivityDetail"] ?? "").trim(),
+        String(row["Activity Number"] ?? row["Prog"] ?? "").trim(),
+        String(row["Sections"] ?? row["Section"] ?? "").trim(),
+        String(row["CenterName"] ?? row["Center Name"] ?? "").trim(),
+        String(row["GLCode"] ?? row["GL Code"] ?? "").trim(),
+        String(row["Budget"] ?? "0.00").trim(),
+      ]);
+
+      // Batch insert 50 rows at a time
+      const BATCH_SIZE = 50;
+      for (let i = 0; i < parsed.length; i += BATCH_SIZE) {
+        const batch = parsed.slice(i, i + BATCH_SIZE);
+        const placeholders: string[] = [];
+        const params: (string | number)[] = [];
+
+        batch.forEach((vals, idx) => {
+          const base = idx * 8;
+          placeholders.push(
+            `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8})`
+          );
+          params.push(...vals);
+        });
+
         await client.query(
-          `INSERT INTO budget_items (upload_id, act_code_id, active_id, fund, activity_detail, prog, center_name, gl_code, budget)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-          [
-            uploadId,
-            (row["ActCodeID"] as number) ?? null,
-            (row["ActiveID"] as number) ?? null,
-            String(row["Fund"] ?? ""),
-            String(row["ActivityDetail"] ?? ""),
-            String(row["Prog"] ?? ""),
-            String(row["CenterName"] ?? ""),
-            String(row["GLCode"] ?? ""),
-            String(row["Budget"] ?? "0.00"),
-          ]
+          `INSERT INTO budget_items (upload_id, fund, activity_detail, prog, section, center_name, gl_code, budget)
+           VALUES ${placeholders.join(", ")}`,
+          params
         );
       }
 
