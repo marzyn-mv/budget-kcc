@@ -23,13 +23,13 @@ export async function GET(req: NextRequest) {
         [pattern]
       );
       dataResult = await query(
-        `SELECT * FROM gl_codes WHERE gl_code ILIKE $1 OR name_en ILIKE $1 OR name_dv ILIKE $1 ORDER BY gl_code ASC LIMIT $2 OFFSET $3`,
+        `SELECT g.*, s.name as section_name FROM gl_codes g LEFT JOIN sections s ON g.section_id = s.id WHERE g.gl_code ILIKE $1 OR g.name_en ILIKE $1 OR g.name_dv ILIKE $1 ORDER BY g.gl_code ASC LIMIT $2 OFFSET $3`,
         [pattern, limit, offset]
       );
     } else {
       countResult = await query<{ count: string }>(`SELECT COUNT(*) as count FROM gl_codes`);
       dataResult = await query(
-        `SELECT * FROM gl_codes ORDER BY gl_code ASC LIMIT $1 OFFSET $2`,
+        `SELECT g.*, s.name as section_name FROM gl_codes g LEFT JOIN sections s ON g.section_id = s.id ORDER BY g.gl_code ASC LIMIT $1 OFFSET $2`,
         [limit, offset]
       );
     }
