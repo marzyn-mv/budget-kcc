@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { gl_code, name_en, name_dv, details } = await req.json();
+    const { gl_code, name_en, name_dv, details, section_id } = await req.json();
     if (!gl_code || !gl_code.trim()) {
       return NextResponse.json({ error: "GL Code is required" }, { status: 400 });
     }
@@ -64,8 +64,8 @@ export async function POST(req: NextRequest) {
     }
 
     await query(
-      `INSERT INTO gl_codes (gl_code, name_en, name_dv, details) VALUES ($1, $2, $3, $4)`,
-      [gl_code.trim(), (name_en || "").trim(), (name_dv || "").trim(), (details || "").trim()]
+      `INSERT INTO gl_codes (gl_code, name_en, name_dv, details, section_id) VALUES ($1, $2, $3, $4, $5)`,
+      [gl_code.trim(), (name_en || "").trim(), (name_dv || "").trim(), (details || "").trim(), section_id || null]
     );
 
     await addLog("info", "gl_code_create", `Created GL code: ${gl_code}`);
@@ -82,7 +82,7 @@ export async function PUT(req: NextRequest) {
   }
 
   try {
-    const { id, gl_code, name_en, name_dv, details } = await req.json();
+    const { id, gl_code, name_en, name_dv, details, section_id } = await req.json();
     if (!id || !gl_code || !gl_code.trim()) {
       return NextResponse.json({ error: "ID and GL Code are required" }, { status: 400 });
     }
@@ -93,8 +93,8 @@ export async function PUT(req: NextRequest) {
     }
 
     await query(
-      `UPDATE gl_codes SET gl_code = $1, name_en = $2, name_dv = $3, details = $4, updated_at = NOW() WHERE id = $5`,
-      [gl_code.trim(), (name_en || "").trim(), (name_dv || "").trim(), (details || "").trim(), id]
+      `UPDATE gl_codes SET gl_code = $1, name_en = $2, name_dv = $3, details = $4, section_id = $5, updated_at = NOW() WHERE id = $6`,
+      [gl_code.trim(), (name_en || "").trim(), (name_dv || "").trim(), (details || "").trim(), section_id || null, id]
     );
 
     await addLog("info", "gl_code_update", `Updated GL code: ${gl_code}`);

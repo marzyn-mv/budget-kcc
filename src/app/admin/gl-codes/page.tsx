@@ -10,10 +10,17 @@ interface GlCode {
   name_en: string;
   name_dv: string;
   details: string;
+  section_id: number | null;
+  section_name: string | null;
   created_at: string;
 }
 
-const emptyForm = { gl_code: "", name_en: "", name_dv: "", details: "" };
+interface Section {
+  id: number;
+  name: string;
+}
+
+const emptyForm = { gl_code: "", name_en: "", name_dv: "", details: "", section_id: "" };
 
 const CSV_TEMPLATE = `gl_code,name_en,name_dv,details
 211001,Staff Salary,މުވައްޒަފުންގެ މުސާރަ,Monthly salary payments
@@ -41,6 +48,9 @@ export default function GlCodesPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadErrors, setUploadErrors] = useState<string[]>([]);
 
+  // sections
+  const [sections, setSections] = useState<Section[]>([]);
+
   // delete confirm
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
@@ -63,6 +73,12 @@ export default function GlCodesPage() {
     fetchData();
   }, [fetchData]);
 
+  useEffect(() => {
+    fetch("/api/sections")
+      .then((r) => r.json())
+      .then((d) => setSections(d.sections || []));
+  }, []);
+
   const openAdd = () => {
     setEditingId(null);
     setForm(emptyForm);
@@ -77,6 +93,7 @@ export default function GlCodesPage() {
       name_en: item.name_en,
       name_dv: item.name_dv,
       details: item.details || "",
+      section_id: item.section_id ? String(item.section_id) : "",
     });
     setShowModal(true);
     setError("");
@@ -90,7 +107,8 @@ export default function GlCodesPage() {
 
     try {
       const method = editingId ? "PUT" : "POST";
-      const body = editingId ? { id: editingId, ...form } : form;
+      const payload = { ...form, section_id: form.section_id ? parseInt(form.section_id) : null };
+      const body = editingId ? { id: editingId, ...payload } : payload;
       const res = await fetch("/api/gl-codes", {
         method,
         headers: { "Content-Type": "application/json" },
@@ -256,6 +274,9 @@ export default function GlCodesPage() {
               <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase" dir="rtl">
                 Dhivehi Name
               </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                Section
+              </th>
               <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase w-24">
                 Actions
               </th>
@@ -274,6 +295,9 @@ export default function GlCodesPage() {
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-900 text-right whitespace-normal break-words" dir="rtl">
                   {item.name_dv || <span className="text-gray-400">-</span>}
+                </td>
+                <td className="px-4 py-3 text-sm text-gray-600">
+                  {item.section_name || <span className="text-gray-400">-</span>}
                 </td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-1">
@@ -380,6 +404,21 @@ export default function GlCodesPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                     dir="rtl"
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Section
+                  </label>
+                  <select
+                    value={form.section_id}
+                    onChange={(e) => setForm({ ...form, section_id: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none select-styled pl-4 pr-10"
+                  >
+                    <option value="">No section</option>
+                    {sections.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
