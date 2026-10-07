@@ -15,6 +15,7 @@ import {
   FileCheck,
   ChevronRight,
   BookOpen,
+  Layers,
 } from "lucide-react";
 
 interface NavItem {
@@ -56,6 +57,7 @@ const navGroups: NavGroup[] = [
   {
     heading: "System",
     items: [
+      { href: "/admin/sections", label: "Sections", icon: Layers },
       { href: "/admin/logs", label: "Logs", icon: ScrollText },
     ],
   },

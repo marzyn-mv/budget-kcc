@@ -85,9 +85,15 @@ async function ensureTables() {
     await sql`CREATE TABLE IF NOT EXISTS gl_codes (
       id SERIAL PRIMARY KEY, gl_code TEXT NOT NULL UNIQUE,
       name_en TEXT NOT NULL DEFAULT '', name_dv TEXT NOT NULL DEFAULT '',
-      details TEXT DEFAULT '',
+      section_id INTEGER, details TEXT DEFAULT '',
       created_at TIMESTAMP DEFAULT NOW(), updated_at TIMESTAMP DEFAULT NOW())`;
     await sql`CREATE INDEX IF NOT EXISTS idx_gl_codes_code ON gl_codes(gl_code)`;
+
+    await sql`CREATE TABLE IF NOT EXISTS sections (
+      id SERIAL PRIMARY KEY, name TEXT NOT NULL UNIQUE,
+      created_at TIMESTAMP DEFAULT NOW())`;
+
+    await sql`ALTER TABLE gl_codes ADD COLUMN IF NOT EXISTS section_id INTEGER`;
 
     initialized = true;
   })();
