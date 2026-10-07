@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Search, X, Copy, Check } from "lucide-react";
+import { Search, X, Copy, Check, ChevronRight } from "lucide-react";
 
 interface GlCode {
   id: number;
@@ -87,6 +87,7 @@ export default function BudgetCodesPage() {
                   <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 w-32">Code</th>
                   <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500">English Name</th>
                   <th className="px-3 py-2.5 text-right text-xs font-medium text-gray-500 pr-5">Dhivehi Name</th>
+                  <th className="w-8"></th>
                 </tr>
               </thead>
               <tbody>
@@ -94,7 +95,7 @@ export default function BudgetCodesPage() {
                   <tr
                     key={item.id}
                     onClick={() => setSelected(item)}
-                    className="border-b border-gray-100 last:border-0 hover:bg-blue-50/40 cursor-pointer transition-colors"
+                    className="group border-b border-gray-100 last:border-0 hover:bg-blue-50/40 cursor-pointer transition-colors"
                   >
                     <td className="pl-5 pr-2 py-3 text-xs text-gray-400 tabular-nums">
                       {(page - 1) * 50 + index + 1}
@@ -119,11 +120,14 @@ export default function BudgetCodesPage() {
                     <td className="px-3 py-3 text-sm text-gray-700 text-right pr-5" dir="rtl">
                       {item.name_dv || <span className="text-gray-300">—</span>}
                     </td>
+                    <td className="pr-3 py-3">
+                      <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition" />
+                    </td>
                   </tr>
                 ))}
                 {glCodes.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="text-center py-16 text-sm text-gray-400">
+                    <td colSpan={5} className="text-center py-16 text-sm text-gray-400">
                       {search ? "No results found" : "No budget codes available"}
                     </td>
                   </tr>
