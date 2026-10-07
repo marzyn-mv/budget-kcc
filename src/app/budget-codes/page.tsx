@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Search, X, ChevronRight, Copy, Check } from "lucide-react";
+import { Search, X, Copy, Check } from "lucide-react";
 
 interface GlCode {
   id: number;
@@ -49,154 +49,147 @@ export default function BudgetCodesPage() {
   }, [fetchData]);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Budget Codes</h2>
-        <p className="text-gray-500">
-          GL code reference for Kulhudhuffushi City Council budget items
-        </p>
-      </div>
-
-      {/* Search */}
-      <div className="mb-6">
-        <div className="relative max-w-md">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Header row */}
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Budget GL Codes</h2>
+          {!loading && (
+            <p className="text-sm text-gray-500 mt-0.5">{total} code{total !== 1 ? "s" : ""}</p>
+          )}
+        </div>
+        <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Search by code or name..."
+            placeholder="Search codes..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           />
         </div>
-        {!loading && (
-          <p className="text-xs text-gray-400 mt-2">{total} budget code{total !== 1 ? "s" : ""}</p>
-        )}
       </div>
 
       {/* Loading */}
       {loading ? (
-        <div className="text-center py-16">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent" />
-          <p className="mt-3 text-gray-500 text-sm">Loading budget codes...</p>
+        <div className="text-center py-20">
+          <div className="inline-block h-7 w-7 animate-spin rounded-full border-[3px] border-solid border-blue-600 border-r-transparent" />
+          <p className="mt-3 text-gray-400 text-sm">Loading...</p>
         </div>
       ) : (
         <>
           {/* Table */}
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase w-10">#</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">GL Code</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">English Name</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Dhivehi Name</th>
-                  <th className="px-4 py-3 w-10"></th>
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200 bg-gray-50/80">
+                  <th className="pl-5 pr-2 py-2.5 text-left text-xs font-medium text-gray-500 w-12">#</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 w-32">Code</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500">English Name</th>
+                  <th className="px-3 py-2.5 text-right text-xs font-medium text-gray-500 pr-5">Dhivehi Name</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody>
                 {glCodes.map((item, index) => (
                   <tr
                     key={item.id}
                     onClick={() => setSelected(item)}
-                    className="hover:bg-gray-50 cursor-pointer group transition"
+                    className="border-b border-gray-100 last:border-0 hover:bg-blue-50/40 cursor-pointer transition-colors"
                   >
-                    <td className="px-4 py-3 text-xs text-gray-300 font-medium">
-                      #{(page - 1) * 50 + index + 1}
+                    <td className="pl-5 pr-2 py-3 text-xs text-gray-400 tabular-nums">
+                      {(page - 1) * 50 + index + 1}
                     </td>
-                    <td className="px-4 py-3">
-                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-blue-50">
-                        <span className="text-sm font-mono font-semibold text-blue-700">{item.gl_code}</span>
-                        <span
-                          role="button"
-                          tabIndex={0}
+                    <td className="px-3 py-3">
+                      <span className="inline-flex items-center gap-1.5">
+                        <code className="text-[13px] font-semibold text-gray-900 font-mono">{item.gl_code}</code>
+                        <button
                           onClick={(e) => copyCode(item.gl_code, e)}
-                          className="p-0.5 rounded text-blue-400 hover:text-blue-600 hover:bg-blue-100 transition"
+                          className="p-0.5 rounded text-gray-300 hover:text-blue-600 transition"
                           title="Copy code"
                         >
                           {copied === item.gl_code
-                            ? <Check className="w-3 h-3 text-green-600" />
-                            : <Copy className="w-3 h-3" />}
-                        </span>
+                            ? <Check className="w-3.5 h-3.5 text-green-500" />
+                            : <Copy className="w-3.5 h-3.5" />}
+                        </button>
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-900 whitespace-normal break-words">
-                      {item.name_en || <span className="text-gray-400 italic">-</span>}
+                    <td className="px-3 py-3 text-sm text-gray-700">
+                      {item.name_en || <span className="text-gray-300">—</span>}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-900 text-right whitespace-normal break-words" dir="rtl">
-                      {item.name_dv || <span className="text-gray-400">-</span>}
-                    </td>
-                    <td className="px-4 py-3">
-                      <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition" />
+                    <td className="px-3 py-3 text-sm text-gray-700 text-right pr-5" dir="rtl">
+                      {item.name_dv || <span className="text-gray-300">—</span>}
                     </td>
                   </tr>
                 ))}
+                {glCodes.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="text-center py-16 text-sm text-gray-400">
+                      {search ? "No results found" : "No budget codes available"}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
-            {glCodes.length === 0 && (
-              <div className="text-center py-12 text-gray-500">
-                {search ? "No budget codes match your search" : "No budget codes available"}
-              </div>
-            )}
           </div>
 
           {/* Pagination */}
-          <div className="flex items-center justify-between mt-6 flex-wrap gap-3">
-            <p className="text-sm text-gray-500">
-              Showing {(page - 1) * 50 + 1}–{Math.min(page * 50, total)} of {total}
-            </p>
+          {total > 0 && (
+            <div className="flex items-center justify-between mt-4">
+              <p className="text-sm text-gray-500">
+                {(page - 1) * 50 + 1}–{Math.min(page * 50, total)} of {total}
+              </p>
 
-            {totalPages > 1 && (
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setPage(page - 1)}
-                  disabled={page <= 1}
-                  className="px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
-                >
-                  Previous
-                </button>
+              {totalPages > 1 && (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setPage(page - 1)}
+                    disabled={page <= 1}
+                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  >
+                    Previous
+                  </button>
 
-                {(() => {
-                  const pages: (number | "...")[] = [];
-                  if (totalPages <= 7) {
-                    for (let i = 1; i <= totalPages; i++) pages.push(i);
-                  } else {
-                    pages.push(1);
-                    if (page > 3) pages.push("...");
-                    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) pages.push(i);
-                    if (page < totalPages - 2) pages.push("...");
-                    pages.push(totalPages);
-                  }
-                  return pages.map((p, i) =>
-                    p === "..." ? (
-                      <span key={`dot-${i}`} className="px-1 text-sm text-gray-400">...</span>
-                    ) : (
-                      <button
-                        key={p}
-                        onClick={() => setPage(p)}
-                        className={`min-w-[36px] px-2 py-1.5 text-sm rounded-lg transition ${
-                          page === p
-                            ? "bg-blue-600 text-white font-medium"
-                            : "border border-gray-300 text-gray-600 hover:bg-gray-50"
-                        }`}
-                      >
-                        {p}
-                      </button>
-                    )
-                  );
-                })()}
+                  {(() => {
+                    const pages: (number | "...")[] = [];
+                    if (totalPages <= 7) {
+                      for (let i = 1; i <= totalPages; i++) pages.push(i);
+                    } else {
+                      pages.push(1);
+                      if (page > 3) pages.push("...");
+                      for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) pages.push(i);
+                      if (page < totalPages - 2) pages.push("...");
+                      pages.push(totalPages);
+                    }
+                    return pages.map((p, i) =>
+                      p === "..." ? (
+                        <span key={`dot-${i}`} className="px-1.5 text-sm text-gray-400">...</span>
+                      ) : (
+                        <button
+                          key={p}
+                          onClick={() => setPage(p)}
+                          className={`min-w-[34px] px-2 py-1.5 text-sm rounded-md transition ${
+                            page === p
+                              ? "bg-blue-600 text-white font-medium"
+                              : "border border-gray-300 text-gray-600 hover:bg-gray-50"
+                          }`}
+                        >
+                          {p}
+                        </button>
+                      )
+                    );
+                  })()}
 
-                <button
-                  onClick={() => setPage(page + 1)}
-                  disabled={page >= totalPages}
-                  className="px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
-                >
-                  Next
-                </button>
-              </div>
-            )}
-          </div>
+                  <button
+                    onClick={() => setPage(page + 1)}
+                    disabled={page >= totalPages}
+                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </>
       )}
 
@@ -204,7 +197,6 @@ export default function BudgetCodesPage() {
       {selected && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setSelected(null)}>
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-            {/* Header */}
             <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-50">
@@ -226,41 +218,28 @@ export default function BudgetCodesPage() {
               </button>
             </div>
 
-            {/* Body */}
             <div className="px-6 py-5 space-y-5">
-              {/* English Name */}
               <div>
-                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                  English Name
-                </label>
+                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">English Name</label>
                 <p className="text-sm text-gray-900">
                   {selected.name_en || <span className="text-gray-400 italic">Not provided</span>}
                 </p>
               </div>
-
-              {/* Dhivehi Name */}
               <div>
-                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                  Dhivehi Name
-                </label>
+                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Dhivehi Name</label>
                 <p className="text-base text-gray-900 text-right" dir="rtl">
                   {selected.name_dv || <span className="text-gray-400 italic">Not provided</span>}
                 </p>
               </div>
-
-              {/* Details */}
               <div>
-                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                  Details
-                </label>
+                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Details</label>
                 <p className="text-sm text-gray-700 leading-relaxed">
                   {selected.details || <span className="text-gray-400 italic">No details available</span>}
                 </p>
               </div>
             </div>
 
-            {/* Footer */}
-            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-xl">
+            <div className="px-6 py-3 border-t border-gray-100 bg-gray-50 rounded-b-xl">
               <button
                 onClick={() => setSelected(null)}
                 className="w-full py-2 text-sm text-gray-600 hover:text-gray-900 transition font-medium"

@@ -129,31 +129,31 @@ export default function HomePage() {
       </div>
 
       {/* Fund breakdown */}
-      <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         {summary ? (
           summary.byFund.map((f) => (
             <button
               key={f.fund}
               onClick={() => handleFundChange(fund === f.fund ? "" : f.fund)}
-              className={`p-3 rounded-lg border text-left transition ${
+              className={`p-4 rounded-lg border text-left transition ${
                 fund === f.fund
                   ? "border-blue-500 bg-blue-50"
                   : "border-gray-200 bg-white hover:border-gray-300"
               }`}
             >
-              <p className="text-xs font-medium text-gray-500">{f.fund}</p>
+              <p className="text-xs font-medium text-gray-500 mb-1">{f.fund}</p>
               <p className="text-sm font-bold text-gray-900">
                 {new Intl.NumberFormat("en-US", {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 }).format(f.total)}
               </p>
-              <p className="text-xs text-gray-500">{f.count} items</p>
+              <p className="text-xs text-gray-500 mt-1">{f.count} items</p>
             </button>
           ))
         ) : (
           [...Array(6)].map((_, i) => (
-            <div key={i} className="p-3 rounded-lg border border-gray-200 bg-white animate-pulse">
+            <div key={i} className="p-4 rounded-lg border border-gray-200 bg-white animate-pulse">
               <div className="h-3 bg-gray-200 rounded w-12 mb-2" />
               <div className="h-4 bg-gray-200 rounded w-20 mb-1" />
               <div className="h-3 bg-gray-100 rounded w-14" />
