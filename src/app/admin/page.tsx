@@ -61,8 +61,8 @@ export default function AdminPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900">Admin Dashboard</h2>
-        <p className="text-gray-500">Manage budget data</p>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-[#E4E6E7]">Admin Dashboard</h2>
+        <p className="text-gray-500 dark:text-[#9BA1A6]">Manage budget data</p>
       </div>
 
       <div className="mb-6">
@@ -94,8 +94,8 @@ export default function AdminPage() {
       </div>
 
       {selectedIds.size > 0 && (
-        <div className="mb-4 flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
-          <span className="text-sm text-blue-800 font-medium">
+        <div className="mb-4 flex items-center justify-between bg-blue-50 dark:bg-blue-900/15 border border-blue-200 dark:border-blue-800/50 rounded-lg px-4 py-3">
+          <span className="text-sm text-blue-800 dark:text-blue-300 font-medium">
             {selectedIds.size} item{selectedIds.size !== 1 ? "s" : ""} selected
           </span>
           <button

@@ -53,9 +53,9 @@ export default function BudgetCodesPage() {
       {/* Header row */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">Budget GL Codes</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Budget GL Codes</h2>
           {!loading && (
-            <p className="text-sm text-gray-500 mt-0.5">{total} code{total !== 1 ? "s" : ""}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{total} code{total !== 1 ? "s" : ""}</p>
           )}
         </div>
         <div className="relative w-64">
@@ -65,7 +65,7 @@ export default function BudgetCodesPage() {
             placeholder="Search codes..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           />
         </div>
       </div>
@@ -79,14 +79,14 @@ export default function BudgetCodesPage() {
       ) : (
         <>
           {/* Table */}
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200 bg-gray-50/80">
-                  <th className="pl-5 pr-2 py-2.5 text-left text-xs font-medium text-gray-500 w-12">#</th>
-                  <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 w-32">Code</th>
-                  <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500">English Name</th>
-                  <th className="px-3 py-2.5 text-right text-xs font-medium text-gray-500 pr-5">Dhivehi Name</th>
+                <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/50">
+                  <th className="pl-5 pr-2 py-2.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400 w-12">#</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400 w-32">Code</th>
+                  <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400">English Name</th>
+                  <th className="px-3 py-2.5 text-right text-xs font-medium text-gray-500 dark:text-gray-400 pr-5">Dhivehi Name</th>
                   <th className="w-8"></th>
                 </tr>
               </thead>
@@ -95,17 +95,17 @@ export default function BudgetCodesPage() {
                   <tr
                     key={item.id}
                     onClick={() => setSelected(item)}
-                    className="group border-b border-gray-100 last:border-0 hover:bg-blue-50/40 cursor-pointer transition-colors"
+                    className="group border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-blue-50/40 dark:hover:bg-blue-900/20 cursor-pointer transition-colors"
                   >
                     <td className="pl-5 pr-2 py-3 text-xs text-gray-400 tabular-nums">
                       {(page - 1) * 50 + index + 1}
                     </td>
                     <td className="px-3 py-3">
                       <span className="inline-flex items-center gap-1.5">
-                        <code className="text-[13px] font-semibold text-gray-900 font-mono">{item.gl_code}</code>
+                        <code className="text-[13px] font-semibold text-gray-900 dark:text-white font-mono">{item.gl_code}</code>
                         <button
                           onClick={(e) => copyCode(item.gl_code, e)}
-                          className="p-0.5 rounded text-gray-300 hover:text-blue-600 transition"
+                          className="p-0.5 rounded text-gray-300 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition"
                           title="Copy code"
                         >
                           {copied === item.gl_code
@@ -114,14 +114,14 @@ export default function BudgetCodesPage() {
                         </button>
                       </span>
                     </td>
-                    <td className="px-3 py-3 text-sm text-gray-700">
-                      {item.name_en || <span className="text-gray-300">—</span>}
+                    <td className="px-3 py-3 text-sm text-gray-700 dark:text-gray-300">
+                      {item.name_en || <span className="text-gray-300 dark:text-gray-600">—</span>}
                     </td>
-                    <td className="px-3 py-3 text-sm text-gray-700 text-right pr-5" dir="rtl">
-                      {item.name_dv || <span className="text-gray-300">—</span>}
+                    <td className="px-3 py-3 text-sm text-gray-700 dark:text-gray-300 text-right pr-5" dir="rtl">
+                      {item.name_dv || <span className="text-gray-300 dark:text-gray-600">—</span>}
                     </td>
                     <td className="pr-3 py-3">
-                      <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition" />
+                      <ChevronRight className="w-4 h-4 text-gray-300 dark:text-gray-600 group-hover:text-gray-500 dark:group-hover:text-gray-400 transition" />
                     </td>
                   </tr>
                 ))}
@@ -139,7 +139,7 @@ export default function BudgetCodesPage() {
           {/* Pagination */}
           {total > 0 && (
             <div className="flex items-center justify-between mt-4">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {(page - 1) * 50 + 1}–{Math.min(page * 50, total)} of {total}
               </p>
 
@@ -148,7 +148,7 @@ export default function BudgetCodesPage() {
                   <button
                     onClick={() => setPage(page - 1)}
                     disabled={page <= 1}
-                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                    className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition"
                   >
                     Previous
                   </button>
@@ -174,7 +174,7 @@ export default function BudgetCodesPage() {
                           className={`min-w-[34px] px-2 py-1.5 text-sm rounded-md transition ${
                             page === p
                               ? "bg-blue-600 text-white font-medium"
-                              : "border border-gray-300 text-gray-600 hover:bg-gray-50"
+                              : "border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                           }`}
                         >
                           {p}
@@ -186,7 +186,7 @@ export default function BudgetCodesPage() {
                   <button
                     onClick={() => setPage(page + 1)}
                     disabled={page >= totalPages}
-                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                    className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition"
                   >
                     Next
                   </button>
@@ -200,24 +200,24 @@ export default function BudgetCodesPage() {
       {/* Detail Modal */}
       {selected && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setSelected(null)}>
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-50">
-                  <span className="text-base font-mono font-bold text-blue-700">{selected.gl_code}</span>
+                <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/30">
+                  <span className="text-base font-mono font-bold text-blue-700 dark:text-blue-400">{selected.gl_code}</span>
                   <button
                     onClick={() => copyCode(selected.gl_code)}
-                    className="p-0.5 rounded text-blue-400 hover:text-blue-600 hover:bg-blue-100 transition"
+                    className="p-0.5 rounded text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800 transition"
                     title="Copy code"
                   >
                     {copied === selected.gl_code
-                      ? <Check className="w-3.5 h-3.5 text-green-600" />
+                      ? <Check className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
                       : <Copy className="w-3.5 h-3.5" />}
                   </button>
                 </span>
-                <h3 className="text-lg font-semibold text-gray-900">Budget Code</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Budget Code</h3>
               </div>
-              <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600 transition">
+              <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -225,28 +225,28 @@ export default function BudgetCodesPage() {
             <div className="px-6 py-5 space-y-5">
               <div>
                 <label className="block text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">English Name</label>
-                <p className="text-sm text-gray-900">
+                <p className="text-sm text-gray-900 dark:text-gray-100">
                   {selected.name_en || <span className="text-gray-400 italic">Not provided</span>}
                 </p>
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Dhivehi Name</label>
-                <p className="text-base text-gray-900 text-right" dir="rtl">
+                <p className="text-base text-gray-900 dark:text-gray-100 text-right" dir="rtl">
                   {selected.name_dv || <span className="text-gray-400 italic">Not provided</span>}
                 </p>
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Details</label>
-                <p className="text-sm text-gray-700 leading-relaxed">
+                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                   {selected.details || <span className="text-gray-400 italic">No details available</span>}
                 </p>
               </div>
             </div>
 
-            <div className="px-6 py-3 border-t border-gray-100 bg-gray-50 rounded-b-xl">
+            <div className="px-6 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-b-xl">
               <button
                 onClick={() => setSelected(null)}
-                className="w-full py-2 text-sm text-gray-600 hover:text-gray-900 transition font-medium"
+                className="w-full py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition font-medium"
               >
                 Close
               </button>

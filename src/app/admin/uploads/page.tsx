@@ -83,22 +83,22 @@ export default function UploadHistoryPage() {
   };
 
   const levelColors: Record<string, string> = {
-    info: "bg-blue-100 text-blue-800",
-    warn: "bg-yellow-100 text-yellow-800",
-    error: "bg-red-100 text-red-800",
+    info: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+    warn: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
+    error: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
   };
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Uploads</h2>
-        <p className="text-gray-500 text-sm">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-[#E4E6E7]">Uploads</h2>
+        <p className="text-gray-500 dark:text-[#9BA1A6] text-sm">
           View all Excel uploads with related activity logs
         </p>
       </div>
 
       {uploads.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-500">
+        <div className="bg-white dark:bg-[#1D1F20] rounded-xl border border-gray-200 dark:border-[#3A3F44] p-12 text-center text-gray-500 dark:text-[#9BA1A6]">
           No uploads yet
         </div>
       ) : (
@@ -106,7 +106,7 @@ export default function UploadHistoryPage() {
           {uploads.map((upload) => (
             <div
               key={upload.id}
-              className="bg-white rounded-xl border border-gray-200 overflow-hidden"
+              className="bg-white dark:bg-[#1D1F20] rounded-xl border border-gray-200 dark:border-[#3A3F44] overflow-hidden"
             >
               <div className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-4">
@@ -114,10 +114,10 @@ export default function UploadHistoryPage() {
                     📄
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">
+                    <p className="font-medium text-gray-900 dark:text-[#E4E6E7]">
                       {upload.filename}
                     </p>
-                    <div className="flex items-center gap-3 text-sm text-gray-500 flex-wrap">
+                    <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-[#9BA1A6] flex-wrap">
                       <span>{upload.rows_imported} rows imported</span>
                       <span>·</span>
                       <span className={upload.linked_items > 0 ? "text-green-600 font-medium" : "text-gray-500"}>
@@ -168,8 +168,8 @@ export default function UploadHistoryPage() {
                     onClick={() => handleExpand(upload.id)}
                     className={`px-3 py-1.5 text-sm rounded-lg border transition ${
                       expandedId === upload.id
-                        ? "bg-blue-50 border-blue-300 text-blue-700"
-                        : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                        ? "bg-blue-50 dark:bg-blue-900/15 border-blue-300 dark:border-blue-800/50 text-blue-700 dark:text-blue-400"
+                        : "border-gray-300 dark:border-[#3A3F44] text-gray-600 dark:text-[#9BA1A6] hover:bg-gray-50 dark:hover:bg-[#262A2E]"
                     }`}
                   >
                     {expandedId === upload.id ? "Hide Logs" : `Logs (${upload.related_logs})`}
@@ -184,7 +184,7 @@ export default function UploadHistoryPage() {
               </div>
 
               {expandedId === upload.id && (
-                <div className="border-t border-gray-200 bg-gray-50 p-4">
+                <div className="border-t border-gray-200 dark:border-[#3A3F44] bg-gray-50 dark:bg-[#15171A] p-4">
                   <h4 className="text-sm font-semibold text-gray-700 mb-3">
                     Related Logs
                   </h4>
@@ -193,7 +193,7 @@ export default function UploadHistoryPage() {
                       <div className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-r-transparent"></div>
                     </div>
                   ) : relatedLogs.length === 0 ? (
-                    <p className="text-sm text-gray-500 py-2">
+                    <p className="text-sm text-gray-500 dark:text-[#9BA1A6] py-2">
                       No related logs found
                     </p>
                   ) : (
@@ -201,7 +201,7 @@ export default function UploadHistoryPage() {
                       {relatedLogs.map((log) => (
                         <div
                           key={log.id}
-                          className="flex items-start gap-3 bg-white rounded-lg border border-gray-200 p-3"
+                          className="flex items-start gap-3 bg-white dark:bg-[#1D1F20] rounded-lg border border-gray-200 dark:border-[#3A3F44] p-3"
                         >
                           <span
                             className={`px-2 py-0.5 text-xs font-medium rounded-full mt-0.5 ${levelColors[log.level] || "bg-gray-100"}`}
@@ -209,16 +209,16 @@ export default function UploadHistoryPage() {
                             {log.level}
                           </span>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900">
+                            <p className="text-sm font-medium text-gray-900 dark:text-[#E4E6E7]">
                               {log.action}
                             </p>
                             {log.details && (
-                              <p className="text-sm text-gray-500 truncate">
+                              <p className="text-sm text-gray-500 dark:text-[#9BA1A6] truncate">
                                 {log.details}
                               </p>
                             )}
                           </div>
-                          <span className="text-xs text-gray-500 whitespace-nowrap">
+                          <span className="text-xs text-gray-500 dark:text-[#9BA1A6] whitespace-nowrap">
                             {log.created_at}
                           </span>
                         </div>
@@ -234,16 +234,16 @@ export default function UploadHistoryPage() {
 
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+          <div className="bg-white dark:bg-[#1D1F20] rounded-xl shadow-xl max-w-md w-full p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600 text-lg">
                 !
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-[#E4E6E7]">
                 Confirm Delete
               </h3>
             </div>
-            <p className="text-sm text-gray-600 mb-2">
+            <p className="text-sm text-gray-600 dark:text-[#9BA1A6] mb-2">
               This will permanently delete the upload record for{" "}
               <strong className="text-gray-900">{deleteConfirm.filename}</strong>.
             </p>
@@ -271,7 +271,7 @@ export default function UploadHistoryPage() {
                 </ul>
               </div>
             )}
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-gray-600 dark:text-[#9BA1A6] mb-4">
               Type the filename below to confirm.
             </p>
             <input
@@ -279,7 +279,7 @@ export default function UploadHistoryPage() {
               value={deleteInput}
               onChange={(e) => setDeleteInput(e.target.value)}
               placeholder={deleteConfirm.filename}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-4 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-[#3A3F44] dark:bg-[#15171A] dark:text-[#E4E6E7] rounded-lg text-sm mb-4 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
               autoFocus
             />
             <div className="flex justify-end gap-3">

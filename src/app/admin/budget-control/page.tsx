@@ -176,12 +176,12 @@ export default function BudgetControlPage() {
   };
 
   const fundColors: Record<string, string> = {
-    "J-GOM": "bg-blue-100 text-blue-800",
-    "J-LCL": "bg-green-100 text-green-800",
-    "L-CWDF": "bg-purple-100 text-purple-800",
-    "L-CPAF": "bg-orange-100 text-orange-800",
-    "L-CRF": "bg-red-100 text-red-800",
-    "L-CTPF": "bg-yellow-100 text-yellow-800",
+    "J-GOM": "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+    "J-LCL": "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+    "L-CWDF": "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+    "L-CPAF": "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
+    "L-CRF": "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+    "L-CTPF": "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
   };
 
   const pageAllSelected = data ? data.items.length > 0 && data.items.every((i) => selected.has(i.id)) : false;
@@ -190,9 +190,9 @@ export default function BudgetControlPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Budget Control</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-[#E4E6E7]">Budget Control</h2>
           {data && (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-[#9BA1A6]">
               {data.total} records &middot; Total: MVR {fmt(data.totalAmount)}
             </p>
           )}
@@ -200,7 +200,7 @@ export default function BudgetControlPage() {
         {data && data.total > 0 && (
           <button
             onClick={() => setShowDeleteAll(true)}
-            className="px-4 py-2 text-sm border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition"
+            className="px-4 py-2 text-sm border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-900/20"
           >
             Remove All
           </button>
@@ -209,15 +209,15 @@ export default function BudgetControlPage() {
 
       {showDeleteAll && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 dark:bg-[#1D1F20]">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600 text-lg">!</div>
-              <h3 className="text-lg font-semibold text-gray-900">Remove All Budget Controls</h3>
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600 text-lg dark:bg-red-900/30">!</div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-[#E4E6E7]">Remove All Budget Controls</h3>
             </div>
-            <p className="text-sm text-gray-600 mb-2">
-              This will permanently delete all <strong className="text-gray-900">{data?.total}</strong> budget control records.
+            <p className="text-sm text-gray-600 mb-2 dark:text-[#9BA1A6]">
+              This will permanently delete all <strong className="text-gray-900 dark:text-[#E4E6E7]">{data?.total}</strong> budget control records.
             </p>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-gray-600 mb-4 dark:text-[#9BA1A6]">
               Type <strong>DELETE</strong> to confirm.
             </p>
             <input
@@ -225,13 +225,13 @@ export default function BudgetControlPage() {
               value={deleteInput}
               onChange={(e) => setDeleteInput(e.target.value)}
               placeholder="DELETE"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-4 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-4 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none dark:border-[#3A3F44] dark:bg-[#262A2E] dark:text-[#E4E6E7]"
               autoFocus
             />
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => { setShowDeleteAll(false); setDeleteInput(""); }}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition"
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition dark:text-[#9BA1A6] dark:hover:text-[#C1C5C9]"
               >
                 Cancel
               </button>
@@ -248,13 +248,13 @@ export default function BudgetControlPage() {
       )}
 
       {/* Upload section */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+      <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6 dark:bg-[#1D1F20] dark:border-[#3A3F44]">
         <form onSubmit={handleUpload} className="flex items-center gap-3 flex-wrap">
           <input
             type="file"
             accept=".xlsx,.xls"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
-            className="text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            className="text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:text-[#9BA1A6]"
           />
           <button
             type="submit"
@@ -276,12 +276,12 @@ export default function BudgetControlPage() {
           placeholder="Search BC number, activities..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+          className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none dark:border-[#3A3F44] dark:bg-[#1D1F20] dark:text-[#E4E6E7] dark:placeholder-[#9BA1A6]"
         />
         <select
           value={fund}
           onChange={(e) => { setFund(e.target.value); setPage(1); }}
-          className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white"
+          className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white dark:border-[#3A3F44] dark:bg-[#1D1F20] dark:text-[#E4E6E7]"
         >
           <option value="">All Funds</option>
           {data?.filters.funds.map((f) => (
@@ -292,13 +292,13 @@ export default function BudgetControlPage() {
 
       {/* Selection toolbar */}
       {selected.size > 0 && (
-        <div className="flex items-center gap-3 mb-4 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
-          <span className="text-sm font-medium text-blue-800">
+        <div className="flex items-center gap-3 mb-4 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 dark:bg-blue-900/20 dark:border-blue-800/50">
+          <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
             {selected.size} selected
           </span>
           <button
             onClick={() => setSelected(new Set())}
-            className="px-3 py-1.5 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-white transition"
+            className="px-3 py-1.5 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-white transition dark:text-[#9BA1A6] dark:border-[#3A3F44] dark:hover:bg-[#262A2E]"
           >
             Deselect All
           </button>
@@ -313,18 +313,18 @@ export default function BudgetControlPage() {
 
       {showDeleteSelected && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 dark:bg-[#1D1F20]">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600 text-lg">!</div>
-              <h3 className="text-lg font-semibold text-gray-900">Delete Selected Records</h3>
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600 text-lg dark:bg-red-900/30">!</div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-[#E4E6E7]">Delete Selected Records</h3>
             </div>
-            <p className="text-sm text-gray-600 mb-4">
-              Are you sure you want to permanently delete <strong className="text-gray-900">{selected.size}</strong> selected budget control record{selected.size !== 1 ? "s" : ""}?
+            <p className="text-sm text-gray-600 mb-4 dark:text-[#9BA1A6]">
+              Are you sure you want to permanently delete <strong className="text-gray-900 dark:text-[#E4E6E7]">{selected.size}</strong> selected budget control record{selected.size !== 1 ? "s" : ""}?
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowDeleteSelected(false)}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition"
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition dark:text-[#9BA1A6] dark:hover:text-[#C1C5C9]"
               >
                 Cancel
               </button>
@@ -351,8 +351,8 @@ export default function BudgetControlPage() {
             {data?.items.map((item) => (
               <div
                 key={item.id}
-                className={`bg-white rounded-lg border p-4 transition ${
-                  selected.has(item.id) ? "border-blue-400 bg-blue-50/50" : "border-gray-200"
+                className={`bg-white rounded-lg border p-4 transition dark:bg-[#1D1F20] ${
+                  selected.has(item.id) ? "border-blue-400 bg-blue-50/50 dark:border-blue-500/50 dark:bg-blue-900/15" : "border-gray-200 dark:border-[#3A3F44]"
                 }`}
               >
                 <div className="flex items-start gap-3">
@@ -365,26 +365,26 @@ export default function BudgetControlPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <span className="text-xs text-gray-500">{item.budget_control_date}</span>
-                        <p className="text-sm font-mono font-medium text-gray-900">{item.budget_control_no}</p>
+                        <span className="text-xs text-gray-500 dark:text-[#9BA1A6]">{item.budget_control_date}</span>
+                        <p className="text-sm font-mono font-medium text-gray-900 dark:text-[#E4E6E7]">{item.budget_control_no}</p>
                       </div>
-                      <span className="text-base font-mono font-bold text-gray-900">
+                      <span className="text-base font-mono font-bold text-gray-900 dark:text-[#E4E6E7]">
                         {fmt(item.amount)}
                       </span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="bg-green-50 rounded p-2">
-                        <p className="text-green-700 font-semibold mb-0.5">Credit (+)</p>
-                        <p className="text-gray-700">{item.cr_activity}</p>
-                        <p className="text-gray-500 font-mono">GL: {item.cr_gl_code}</p>
+                      <div className="bg-green-50 rounded p-2 dark:bg-green-900/20">
+                        <p className="text-green-700 font-semibold mb-0.5 dark:text-green-400">Credit (+)</p>
+                        <p className="text-gray-700 dark:text-[#C1C5C9]">{item.cr_activity}</p>
+                        <p className="text-gray-500 font-mono dark:text-[#9BA1A6]">GL: {item.cr_gl_code}</p>
                         <span className={`inline-block mt-1 px-1.5 py-0.5 text-[10px] font-medium rounded-full ${fundColors[item.cr_fund] || "bg-gray-100 text-gray-800"}`}>
                           {item.cr_fund}
                         </span>
                       </div>
-                      <div className="bg-red-50 rounded p-2">
-                        <p className="text-red-700 font-semibold mb-0.5">Debit (-)</p>
-                        <p className="text-gray-700">{item.dr_activity}</p>
-                        <p className="text-gray-500 font-mono">GL: {item.dr_gl_code}</p>
+                      <div className="bg-red-50 rounded p-2 dark:bg-red-900/20">
+                        <p className="text-red-700 font-semibold mb-0.5 dark:text-red-400">Debit (-)</p>
+                        <p className="text-gray-700 dark:text-[#C1C5C9]">{item.dr_activity}</p>
+                        <p className="text-gray-500 font-mono dark:text-[#9BA1A6]">GL: {item.dr_gl_code}</p>
                         <span className={`inline-block mt-1 px-1.5 py-0.5 text-[10px] font-medium rounded-full ${fundColors[item.dr_fund] || "bg-gray-100 text-gray-800"}`}>
                           {item.dr_fund}
                         </span>
@@ -397,9 +397,9 @@ export default function BudgetControlPage() {
           </div>
 
           {/* Desktop table */}
-          <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-200">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-200 dark:border-[#3A3F44]">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-[#3A3F44]">
+              <thead className="bg-gray-50 dark:bg-[#262A2E]">
                 <tr>
                   <th className="px-3 py-3 text-left">
                     <input
@@ -409,28 +409,28 @@ export default function BudgetControlPage() {
                       className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
                   </th>
-                  <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date</th>
-                  <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase">BC No</th>
-                  <th className="px-3 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Amount</th>
-                  <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                    <span className="text-green-700">Credit (+) Activity</span>
+                  <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase dark:text-[#9BA1A6]">Date</th>
+                  <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase dark:text-[#9BA1A6]">BC No</th>
+                  <th className="px-3 py-3 text-right text-xs font-semibold text-gray-600 uppercase dark:text-[#9BA1A6]">Amount</th>
+                  <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase dark:text-[#9BA1A6]">
+                    <span className="text-green-700 dark:text-green-400">Credit (+) Activity</span>
                   </th>
-                  <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                    <span className="text-green-700">GL</span>
+                  <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase dark:text-[#9BA1A6]">
+                    <span className="text-green-700 dark:text-green-400">GL</span>
                   </th>
-                  <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                    <span className="text-red-700">Debit (-) Activity</span>
+                  <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase dark:text-[#9BA1A6]">
+                    <span className="text-red-700 dark:text-red-400">Debit (-) Activity</span>
                   </th>
-                  <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                    <span className="text-red-700">GL</span>
+                  <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase dark:text-[#9BA1A6]">
+                    <span className="text-red-700 dark:text-red-400">GL</span>
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white divide-y divide-gray-200 dark:bg-[#1D1F20] dark:divide-[#3A3F44]">
                 {data?.items.map((item) => (
                   <tr
                     key={item.id}
-                    className={`transition ${selected.has(item.id) ? "bg-blue-50" : "hover:bg-gray-50"}`}
+                    className={`transition ${selected.has(item.id) ? "bg-blue-50 dark:bg-blue-900/15" : "hover:bg-gray-50 dark:hover:bg-[#262A2E]"}`}
                   >
                     <td className="px-3 py-3">
                       <input
@@ -440,25 +440,25 @@ export default function BudgetControlPage() {
                         className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
                     </td>
-                    <td className="px-3 py-3 text-sm text-gray-600 whitespace-nowrap">{item.budget_control_date}</td>
-                    <td className="px-3 py-3 text-sm text-gray-900 font-mono whitespace-nowrap">{item.budget_control_no}</td>
-                    <td className="px-3 py-3 text-sm text-gray-900 text-right font-mono font-medium whitespace-nowrap">
+                    <td className="px-3 py-3 text-sm text-gray-600 whitespace-nowrap dark:text-[#9BA1A6]">{item.budget_control_date}</td>
+                    <td className="px-3 py-3 text-sm text-gray-900 font-mono whitespace-nowrap dark:text-[#E4E6E7]">{item.budget_control_no}</td>
+                    <td className="px-3 py-3 text-sm text-gray-900 text-right font-mono font-medium whitespace-nowrap dark:text-[#E4E6E7]">
                       {fmt(item.amount)}
                     </td>
-                    <td className="px-3 py-3 text-sm text-gray-700 max-w-[180px] truncate" title={item.cr_activity}>
+                    <td className="px-3 py-3 text-sm text-gray-700 max-w-[180px] truncate dark:text-[#C1C5C9]" title={item.cr_activity}>
                       {item.cr_activity}
                     </td>
-                    <td className="px-3 py-3 text-sm text-gray-600 font-mono">{item.cr_gl_code}</td>
-                    <td className="px-3 py-3 text-sm text-gray-700 max-w-[180px] truncate" title={item.dr_activity}>
+                    <td className="px-3 py-3 text-sm text-gray-600 font-mono dark:text-[#9BA1A6]">{item.cr_gl_code}</td>
+                    <td className="px-3 py-3 text-sm text-gray-700 max-w-[180px] truncate dark:text-[#C1C5C9]" title={item.dr_activity}>
                       {item.dr_activity}
                     </td>
-                    <td className="px-3 py-3 text-sm text-gray-600 font-mono">{item.dr_gl_code}</td>
+                    <td className="px-3 py-3 text-sm text-gray-600 font-mono dark:text-[#9BA1A6]">{item.dr_gl_code}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
             {data?.items.length === 0 && (
-              <div className="text-center py-12 text-gray-500">No budget control records found</div>
+              <div className="text-center py-12 text-gray-500 dark:text-[#9BA1A6]">No budget control records found</div>
             )}
           </div>
 

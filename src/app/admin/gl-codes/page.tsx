@@ -201,15 +201,15 @@ export default function GlCodesPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Budget GL Codes</h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-[#E4E6E7]">Budget GL Codes</h2>
+          <p className="text-sm text-gray-500 dark:text-[#9BA1A6] mt-1">
             {total} GL code{total !== 1 ? "s" : ""} registered
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => { setShowBulkModal(true); setError(""); setUploadErrors([]); setCsvFile(null); }}
-            className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition"
+            className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 dark:border-[#3A3F44] text-gray-700 dark:text-[#C1C5C9] rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-[#262A2E] transition"
           >
             <Upload className="w-4 h-4" />
             Bulk Upload
@@ -226,13 +226,13 @@ export default function GlCodesPage() {
 
       {/* Alerts */}
       {message && (
-        <div className="mb-4 px-4 py-3 bg-green-50 border border-green-200 text-green-800 rounded-lg text-sm flex items-center justify-between">
+        <div className="mb-4 px-4 py-3 bg-green-50 dark:bg-green-900/15 border border-green-200 dark:border-green-800/50 text-green-800 dark:text-green-300 rounded-lg text-sm flex items-center justify-between">
           {message}
           <button onClick={() => setMessage("")}><X className="w-4 h-4" /></button>
         </div>
       )}
       {error && !showModal && !showBulkModal && (
-        <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm flex items-center justify-between">
+        <div className="mb-4 px-4 py-3 bg-red-50 dark:bg-red-900/15 border border-red-200 dark:border-red-800/50 text-red-800 dark:text-red-300 rounded-lg text-sm flex items-center justify-between">
           {error}
           <button onClick={() => setError("")}><X className="w-4 h-4" /></button>
         </div>
@@ -255,26 +255,26 @@ export default function GlCodesPage() {
             placeholder="Search by code or name..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            className="w-full pl-9 pr-4 py-2 border border-gray-300 dark:border-[#3A3F44] rounded-lg text-sm bg-white dark:bg-[#15171A] dark:text-[#E4E6E7] focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="bg-white dark:bg-[#1D1F20] rounded-xl border border-gray-200 dark:border-[#3A3F44] overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-[#3A3F44]">
+          <thead className="bg-gray-50 dark:bg-[#262A2E]">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase">
                 GL Code
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase">
                 English Name
               </th>
-              <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase" dir="rtl">
+              <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase" dir="rtl">
                 Dhivehi Name
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase">
                 Section
               </th>
               <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase w-24">
@@ -282,35 +282,35 @@ export default function GlCodesPage() {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-200 dark:divide-[#3A3F44]">
             {glCodes.map((item) => (
-              <tr key={item.id} className="hover:bg-gray-50">
+              <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-[#262A2E]">
                 <td className="px-4 py-3">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-gray-100 text-sm font-mono font-medium text-gray-800">
                     {item.gl_code}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-900 whitespace-normal break-words">
-                  {item.name_en || <span className="text-gray-400">-</span>}
+                <td className="px-4 py-3 text-sm text-gray-900 dark:text-[#E4E6E7] whitespace-normal break-words">
+                  {item.name_en || <span className="text-gray-400 dark:text-[#9BA1A6]">-</span>}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-900 text-right whitespace-normal break-words" dir="rtl">
-                  {item.name_dv || <span className="text-gray-400">-</span>}
+                <td className="px-4 py-3 text-sm text-gray-900 dark:text-[#E4E6E7] text-right whitespace-normal break-words" dir="rtl">
+                  {item.name_dv || <span className="text-gray-400 dark:text-[#9BA1A6]">-</span>}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-600">
-                  {item.section_name || <span className="text-gray-400">-</span>}
+                <td className="px-4 py-3 text-sm text-gray-600 dark:text-[#9BA1A6]">
+                  {item.section_name || <span className="text-gray-400 dark:text-[#9BA1A6]">-</span>}
                 </td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-1">
                     <button
                       onClick={() => openEdit(item)}
-                      className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition"
+                      className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition"
                       title="Edit"
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => setDeleteId(item.id)}
-                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition"
+                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition"
                       title="Delete"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -322,7 +322,7 @@ export default function GlCodesPage() {
           </tbody>
         </table>
         {glCodes.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-gray-500 dark:text-[#9BA1A6]">
             {search ? "No GL codes match your search" : "No GL codes added yet"}
           </div>
         )}
@@ -334,17 +334,17 @@ export default function GlCodesPage() {
           <button
             onClick={() => setPage(page - 1)}
             disabled={page <= 1}
-            className="px-3 py-2 text-sm border rounded-lg hover:bg-gray-50 disabled:opacity-50"
+            className="px-3 py-2 text-sm border dark:border-[#3A3F44] rounded-lg hover:bg-gray-50 dark:hover:bg-[#262A2E] disabled:opacity-50"
           >
             Previous
           </button>
-          <span className="text-sm text-gray-600 px-3">
+          <span className="text-sm text-gray-600 dark:text-[#9BA1A6] px-3">
             Page {page} of {totalPages}
           </span>
           <button
             onClick={() => setPage(page + 1)}
             disabled={page >= totalPages}
-            className="px-3 py-2 text-sm border rounded-lg hover:bg-gray-50 disabled:opacity-50"
+            className="px-3 py-2 text-sm border dark:border-[#3A3F44] rounded-lg hover:bg-gray-50 dark:hover:bg-[#262A2E] disabled:opacity-50"
           >
             Next
           </button>
@@ -354,16 +354,16 @@ export default function GlCodesPage() {
       {/* Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">
+          <div className="bg-white dark:bg-[#1D1F20] rounded-xl shadow-xl max-w-lg w-full">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-[#3A3F44]">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-[#E4E6E7]">
                 {editingId ? "Edit GL Code" : "Add GL Code"}
               </h3>
             </div>
             <form onSubmit={handleSave}>
               <div className="px-6 py-4 space-y-4">
                 {error && (
-                  <div className="px-3 py-2 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm">
+                  <div className="px-3 py-2 bg-red-50 dark:bg-red-900/15 border border-red-200 dark:border-red-800/50 text-red-800 dark:text-red-300 rounded-lg text-sm">
                     {error}
                   </div>
                 )}
@@ -376,7 +376,7 @@ export default function GlCodesPage() {
                     value={form.gl_code}
                     onChange={(e) => setForm({ ...form, gl_code: e.target.value })}
                     placeholder="e.g. 211001"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none font-mono"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-[#3A3F44] dark:bg-[#15171A] dark:text-[#E4E6E7] rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none font-mono"
                     required
                   />
                 </div>
@@ -389,7 +389,7 @@ export default function GlCodesPage() {
                     value={form.name_en}
                     onChange={(e) => setForm({ ...form, name_en: e.target.value })}
                     placeholder="e.g. Staff Salary"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-[#3A3F44] dark:bg-[#15171A] dark:text-[#E4E6E7] rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   />
                 </div>
                 <div>
@@ -401,7 +401,7 @@ export default function GlCodesPage() {
                     value={form.name_dv}
                     onChange={(e) => setForm({ ...form, name_dv: e.target.value })}
                     placeholder="މުވައްޒަފުންގެ މުސާރަ"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-[#3A3F44] dark:bg-[#15171A] dark:text-[#E4E6E7] rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                     dir="rtl"
                   />
                 </div>
@@ -412,7 +412,7 @@ export default function GlCodesPage() {
                   <select
                     value={form.section_id}
                     onChange={(e) => setForm({ ...form, section_id: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none select-styled pl-4 pr-10"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-[#3A3F44] dark:bg-[#15171A] dark:text-[#E4E6E7] rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none select-styled pl-4 pr-10"
                   >
                     <option value="">No section</option>
                     {sections.map((s) => (
@@ -429,15 +429,15 @@ export default function GlCodesPage() {
                     onChange={(e) => setForm({ ...form, details: e.target.value })}
                     placeholder="Additional details about this GL code..."
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-[#3A3F44] dark:bg-[#15171A] dark:text-[#E4E6E7] rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
                   />
                 </div>
               </div>
-              <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+              <div className="px-6 py-4 border-t border-gray-200 dark:border-[#3A3F44] flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                  className="px-4 py-2 text-sm text-gray-700 dark:text-[#C1C5C9] border border-gray-300 dark:border-[#3A3F44] rounded-lg hover:bg-gray-50 dark:hover:bg-[#262A2E] transition"
                 >
                   Cancel
                 </button>
@@ -457,9 +457,9 @@ export default function GlCodesPage() {
       {/* Bulk Upload Modal */}
       {showBulkModal && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-xl w-full">
-            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Bulk Upload GL Codes</h3>
+          <div className="bg-white dark:bg-[#1D1F20] rounded-xl shadow-xl max-w-xl w-full">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-[#3A3F44] flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-[#E4E6E7]">Bulk Upload GL Codes</h3>
               <button onClick={() => setShowBulkModal(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="w-5 h-5" />
               </button>
@@ -467,7 +467,7 @@ export default function GlCodesPage() {
 
             <div className="px-6 py-5 space-y-5">
               {error && (
-                <div className="px-3 py-2 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm">
+                <div className="px-3 py-2 bg-red-50 dark:bg-red-900/15 border border-red-200 dark:border-red-800/50 text-red-800 dark:text-red-300 rounded-lg text-sm">
                   {error}
                 </div>
               )}
@@ -557,11 +557,11 @@ export default function GlCodesPage() {
               {uploading && <UploadProgress active={uploading} />}
             </div>
 
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-[#3A3F44] flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setShowBulkModal(false)}
-                className="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                className="px-4 py-2 text-sm text-gray-700 dark:text-[#C1C5C9] border border-gray-300 dark:border-[#3A3F44] rounded-lg hover:bg-gray-50 dark:hover:bg-[#262A2E] transition"
               >
                 Cancel
               </button>
@@ -581,15 +581,15 @@ export default function GlCodesPage() {
       {/* Delete Confirm Modal */}
       {deleteId && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete GL Code</h3>
-            <p className="text-sm text-gray-600 mb-6">
+          <div className="bg-white dark:bg-[#1D1F20] rounded-xl shadow-xl max-w-sm w-full p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-[#E4E6E7] mb-2">Delete GL Code</h3>
+            <p className="text-sm text-gray-600 dark:text-[#9BA1A6] mb-6">
               Are you sure you want to delete this GL code? This action cannot be undone.
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setDeleteId(null)}
-                className="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                className="px-4 py-2 text-sm text-gray-700 dark:text-[#C1C5C9] border border-gray-300 dark:border-[#3A3F44] rounded-lg hover:bg-gray-50 dark:hover:bg-[#262A2E] transition"
               >
                 Cancel
               </button>

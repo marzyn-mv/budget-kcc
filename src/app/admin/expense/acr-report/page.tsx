@@ -171,12 +171,12 @@ export default function ACRReportPage() {
   };
 
   const fundColors: Record<string, string> = {
-    "J-GOM": "bg-blue-100 text-blue-800",
-    "J-LCL": "bg-green-100 text-green-800",
-    "L-CWDF": "bg-purple-100 text-purple-800",
-    "L-CPAF": "bg-orange-100 text-orange-800",
-    "L-CRF": "bg-red-100 text-red-800",
-    "L-CTPF": "bg-yellow-100 text-yellow-800",
+    "J-GOM": "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+    "J-LCL": "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+    "L-CWDF": "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+    "L-CPAF": "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
+    "L-CRF": "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+    "L-CTPF": "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
   };
 
   const pageAllSelected = data ? data.items.length > 0 && data.items.every((i) => selected.has(i.id)) : false;
@@ -185,12 +185,12 @@ export default function ACRReportPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <a href="/admin/expense" className="text-sm text-blue-600 hover:text-blue-800">
+          <a href="/admin/expense" className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
             &larr; Back to Expense
           </a>
-          <h2 className="text-2xl font-bold text-gray-900 mt-1">ACR Detail Report</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-[#E4E6E7] mt-1">ACR Detail Report</h2>
           {data && (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-[#9BA1A6]">
               {data.total} records &middot; Total: MVR {data.totalAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
             </p>
           )}
@@ -198,7 +198,7 @@ export default function ACRReportPage() {
         {data && data.total > 0 && (
           <button
             onClick={() => setShowDeleteAll(true)}
-            className="px-4 py-2 text-sm border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition"
+            className="px-4 py-2 text-sm border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-900/20"
           >
             Remove All
           </button>
@@ -207,15 +207,15 @@ export default function ACRReportPage() {
 
       {showDeleteAll && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+          <div className="bg-white dark:bg-[#1D1F20] rounded-xl shadow-xl max-w-md w-full p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600 text-lg">!</div>
-              <h3 className="text-lg font-semibold text-gray-900">Remove All ACR Reports</h3>
+              <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center text-red-600 text-lg">!</div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-[#E4E6E7]">Remove All ACR Reports</h3>
             </div>
-            <p className="text-sm text-gray-600 mb-2">
-              This will permanently delete all <strong className="text-gray-900">{data?.total}</strong> ACR reports and remove them from expense tracking.
+            <p className="text-sm text-gray-600 dark:text-[#9BA1A6] mb-2">
+              This will permanently delete all <strong className="text-gray-900 dark:text-[#E4E6E7]">{data?.total}</strong> ACR reports and remove them from expense tracking.
             </p>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-gray-600 dark:text-[#9BA1A6] mb-4">
               Type <strong>DELETE</strong> to confirm.
             </p>
             <input
@@ -223,13 +223,13 @@ export default function ACRReportPage() {
               value={deleteInput}
               onChange={(e) => setDeleteInput(e.target.value)}
               placeholder="DELETE"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-4 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-[#3A3F44] dark:bg-[#262A2E] dark:text-[#E4E6E7] rounded-lg text-sm mb-4 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
               autoFocus
             />
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => { setShowDeleteAll(false); setDeleteInput(""); }}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition"
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition dark:text-[#9BA1A6] dark:hover:text-[#C1C5C9]"
               >
                 Cancel
               </button>
@@ -246,13 +246,13 @@ export default function ACRReportPage() {
       )}
 
       {/* Upload section */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+      <div className="bg-white dark:bg-[#1D1F20] rounded-lg border border-gray-200 dark:border-[#3A3F44] p-4 mb-6">
         <form onSubmit={handleUpload} className="flex items-center gap-3 flex-wrap">
           <input
             type="file"
             accept=".xlsx,.xls"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
-            className="text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            className="text-sm text-gray-600 dark:text-[#9BA1A6] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
           />
           <button
             type="submit"
@@ -274,12 +274,12 @@ export default function ACRReportPage() {
           placeholder="Search activities, vouchers, GL codes..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+          className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-[#3A3F44] dark:bg-[#1D1F20] dark:text-[#E4E6E7] dark:placeholder-[#9BA1A6] rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
         />
         <select
           value={fund}
           onChange={(e) => { setFund(e.target.value); setPage(1); }}
-          className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white"
+          className="px-4 py-2.5 border border-gray-300 dark:border-[#3A3F44] dark:bg-[#1D1F20] dark:text-[#E4E6E7] rounded-lg text-sm bg-white"
         >
           <option value="">All Funds</option>
           {data?.filters.funds.map((f) => (
@@ -290,13 +290,13 @@ export default function ACRReportPage() {
 
       {/* Selection toolbar */}
       {selected.size > 0 && (
-        <div className="flex items-center gap-3 mb-4 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
-          <span className="text-sm font-medium text-blue-800">
+        <div className="flex items-center gap-3 mb-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-lg px-4 py-3">
+          <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
             {selected.size} selected
           </span>
           <button
             onClick={() => setSelected(new Set())}
-            className="px-3 py-1.5 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-white transition"
+            className="px-3 py-1.5 text-sm text-gray-600 dark:text-[#9BA1A6] border border-gray-300 dark:border-[#3A3F44] rounded-lg hover:bg-white dark:hover:bg-[#262A2E] transition"
           >
             Deselect All
           </button>
@@ -312,18 +312,18 @@ export default function ACRReportPage() {
       {/* Confirm delete selected modal */}
       {showDeleteSelected && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+          <div className="bg-white dark:bg-[#1D1F20] rounded-xl shadow-xl max-w-md w-full p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600 text-lg">!</div>
-              <h3 className="text-lg font-semibold text-gray-900">Delete Selected ACR Reports</h3>
+              <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center text-red-600 text-lg">!</div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-[#E4E6E7]">Delete Selected ACR Reports</h3>
             </div>
-            <p className="text-sm text-gray-600 mb-4">
-              Are you sure you want to permanently delete <strong className="text-gray-900">{selected.size}</strong> selected ACR report{selected.size !== 1 ? "s" : ""}? This will also remove them from expense tracking.
+            <p className="text-sm text-gray-600 dark:text-[#9BA1A6] mb-4">
+              Are you sure you want to permanently delete <strong className="text-gray-900 dark:text-[#E4E6E7]">{selected.size}</strong> selected ACR report{selected.size !== 1 ? "s" : ""}? This will also remove them from expense tracking.
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowDeleteSelected(false)}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition"
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition dark:text-[#9BA1A6] dark:hover:text-[#C1C5C9]"
               >
                 Cancel
               </button>
@@ -350,8 +350,10 @@ export default function ACRReportPage() {
             {data?.items.map((item) => (
               <div
                 key={item.id}
-                className={`bg-white rounded-lg border p-4 transition ${
-                  selected.has(item.id) ? "border-blue-400 bg-blue-50/50" : "border-gray-200"
+                className={`bg-white dark:bg-[#1D1F20] rounded-lg border p-4 transition ${
+                  selected.has(item.id)
+                    ? "border-blue-400 bg-blue-50/50 dark:border-blue-500/50 dark:bg-blue-900/15"
+                    : "border-gray-200 dark:border-[#3A3F44]"
                 }`}
               >
                 <div className="flex items-start gap-3">
@@ -367,17 +369,17 @@ export default function ACRReportPage() {
                         <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${fundColors[item.fund_code] || "bg-gray-100 text-gray-800"}`}>
                           {item.fund_code}
                         </span>
-                        <span className="text-xs text-gray-500">{item.produce_date}</span>
+                        <span className="text-xs text-gray-500 dark:text-[#9BA1A6]">{item.produce_date}</span>
                       </div>
-                      <span className="text-base font-mono font-bold text-gray-900">
+                      <span className="text-base font-mono font-bold text-gray-900 dark:text-[#E4E6E7]">
                         {Number(item.total).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </span>
                     </div>
-                    <p className="text-sm font-medium text-gray-900 mb-1">{item.voucher_full}</p>
-                    <p className="text-xs text-gray-500 mb-2">{item.remarks}</p>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
-                      <span><span className="text-gray-500">GL:</span> <span className="font-mono">{item.gl_code}</span></span>
-                      <span><span className="text-gray-500">Activity:</span> {item.activity_detail}</span>
+                    <p className="text-sm font-medium text-gray-900 dark:text-[#E4E6E7] mb-1">{item.voucher_full}</p>
+                    <p className="text-xs text-gray-500 dark:text-[#9BA1A6] mb-2">{item.remarks}</p>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-[#9BA1A6]">
+                      <span><span className="text-gray-500 dark:text-[#9BA1A6]">GL:</span> <span className="font-mono">{item.gl_code}</span></span>
+                      <span><span className="text-gray-500 dark:text-[#9BA1A6]">Activity:</span> {item.activity_detail}</span>
                     </div>
                   </div>
                 </div>
@@ -386,9 +388,9 @@ export default function ACRReportPage() {
           </div>
 
           {/* Desktop table */}
-          <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-200">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-200 dark:border-[#3A3F44]">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-[#3A3F44]">
+              <thead className="bg-gray-50 dark:bg-[#262A2E]">
                 <tr>
                   <th className="px-4 py-3 text-left">
                     <input
@@ -398,20 +400,20 @@ export default function ACRReportPage() {
                       className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Voucher #</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Fund</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">GL Code</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Activity</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Remarks</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Amount</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase">Date</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase">Voucher #</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase">Fund</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase">GL Code</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase">Activity</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase">Remarks</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase">Amount</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-[#1D1F20] divide-y divide-gray-200 dark:divide-[#3A3F44]">
                 {data?.items.map((item) => (
                   <tr
                     key={item.id}
-                    className={`transition ${selected.has(item.id) ? "bg-blue-50" : "hover:bg-gray-50"}`}
+                    className={`transition ${selected.has(item.id) ? "bg-blue-50 dark:bg-blue-900/15" : "hover:bg-gray-50 dark:hover:bg-[#262A2E]"}`}
                   >
                     <td className="px-4 py-3">
                       <input
@@ -421,17 +423,17 @@ export default function ACRReportPage() {
                         className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">{item.produce_date}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600 font-mono whitespace-nowrap">{item.voucher_full}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-[#9BA1A6] whitespace-nowrap">{item.produce_date}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-[#9BA1A6] font-mono whitespace-nowrap">{item.voucher_full}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${fundColors[item.fund_code] || "bg-gray-100 text-gray-800"}`}>
                         {item.fund_code}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 font-mono">{item.gl_code}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600 max-w-[200px] truncate">{item.activity_detail}</td>
-                    <td className="px-4 py-3 text-sm text-gray-500 max-w-[250px] truncate">{item.remarks}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900 text-right font-mono font-medium whitespace-nowrap">
+                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-[#9BA1A6] font-mono">{item.gl_code}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-[#9BA1A6] max-w-[200px] truncate">{item.activity_detail}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500 dark:text-[#9BA1A6] max-w-[250px] truncate">{item.remarks}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900 dark:text-[#E4E6E7] text-right font-mono font-medium whitespace-nowrap">
                       {Number(item.total).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                     </td>
                   </tr>
@@ -439,7 +441,7 @@ export default function ACRReportPage() {
               </tbody>
             </table>
             {data?.items.length === 0 && (
-              <div className="text-center py-12 text-gray-500">No ACR records found</div>
+              <div className="text-center py-12 text-gray-500 dark:text-[#9BA1A6]">No ACR records found</div>
             )}
           </div>
 

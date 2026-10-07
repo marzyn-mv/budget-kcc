@@ -12,7 +12,8 @@
       "Bash(npx next:*)",
       "Bash(node:*)",
       "Bash(npx tsc:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "WebSearch"
     ]
   }
 }

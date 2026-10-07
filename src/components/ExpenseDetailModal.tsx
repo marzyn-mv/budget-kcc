@@ -92,14 +92,14 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col">
+      <div className="bg-white dark:bg-[#1D1F20] rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200 flex items-start justify-between">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-[#3A3F44] flex items-start justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-[#E4E6E7]">
               {item.activity_detail}
             </h3>
-            <div className="flex gap-3 mt-1 text-sm text-gray-500">
+            <div className="flex gap-3 mt-1 text-sm text-gray-500 dark:text-[#9BA1A6]">
               <span>Fund: <span className="font-mono">{item.fund}</span></span>
               <span>GL: <span className="font-mono">{item.gl_code}</span></span>
               <span>Center: {item.center_name}</span>
@@ -107,51 +107,51 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
           </div>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-600 text-xl leading-none p-1"
+            className="text-gray-500 hover:text-gray-600 dark:text-[#9BA1A6] dark:hover:text-[#E4E6E7] text-xl leading-none p-1"
           >
             &times;
           </button>
         </div>
 
         {/* Summary bar */}
-        <div className="px-6 py-3 bg-gray-50 grid grid-cols-3 sm:grid-cols-6 gap-3 text-center">
+        <div className="px-6 py-3 bg-gray-50 dark:bg-[#15171A] grid grid-cols-3 sm:grid-cols-6 gap-3 text-center">
           <div>
-            <p className="text-xs text-gray-500">Approved Budget</p>
-            <p className="text-sm font-bold text-gray-900">{fmt(budgetNum)}</p>
+            <p className="text-xs text-gray-500 dark:text-[#9BA1A6]">Approved Budget</p>
+            <p className="text-sm font-bold text-gray-900 dark:text-[#E4E6E7]">{fmt(budgetNum)}</p>
             {!loading && data && data.bcNet !== 0 && (
-              <p className={`text-[10px] font-medium ${data.bcNet > 0 ? "text-teal-600" : "text-red-500"}`}>
+              <p className={`text-[10px] font-medium ${data.bcNet > 0 ? "text-teal-600 dark:text-teal-400" : "text-red-500 dark:text-red-400"}`}>
                 BC: {data.bcNet > 0 ? "+" : ""}{fmt(data.bcNet)}
               </p>
             )}
           </div>
           <div>
-            <p className="text-xs text-gray-500">PO Spent</p>
-            <p className="text-sm font-bold text-blue-600">
+            <p className="text-xs text-gray-500 dark:text-[#9BA1A6]">PO Spent</p>
+            <p className="text-sm font-bold text-blue-600 dark:text-blue-400">
               {loading ? "..." : fmt(data?.poTotal ?? 0)}
             </p>
           </div>
           <div>
-            <p className="text-xs text-gray-500">Voucher Spent</p>
-            <p className="text-sm font-bold text-purple-600">
+            <p className="text-xs text-gray-500 dark:text-[#9BA1A6]">Voucher Spent</p>
+            <p className="text-sm font-bold text-purple-600 dark:text-purple-400">
               {loading ? "..." : fmt(data?.voucherTotal ?? 0)}
             </p>
           </div>
           <div>
-            <p className="text-xs text-gray-500">ACR Spent</p>
-            <p className="text-sm font-bold text-orange-600">
+            <p className="text-xs text-gray-500 dark:text-[#9BA1A6]">ACR Spent</p>
+            <p className="text-sm font-bold text-orange-600 dark:text-orange-400">
               {loading ? "..." : fmt(data?.acrTotal ?? 0)}
             </p>
           </div>
           <div>
-            <p className="text-xs text-gray-500">Effective Budget</p>
-            <p className="text-sm font-bold text-gray-900">
+            <p className="text-xs text-gray-500 dark:text-[#9BA1A6]">Effective Budget</p>
+            <p className="text-sm font-bold text-gray-900 dark:text-[#E4E6E7]">
               {loading ? "..." : fmt(effectiveBudget)}
             </p>
           </div>
           <div>
-            <p className="text-xs text-gray-500">Remaining</p>
+            <p className="text-xs text-gray-500 dark:text-[#9BA1A6]">Remaining</p>
             <p
-              className={`text-sm font-bold ${remaining >= 0 ? "text-green-600" : "text-red-600"}`}
+              className={`text-sm font-bold ${remaining >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
             >
               {loading ? "..." : fmt(remaining)}
             </p>
@@ -159,13 +159,13 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
         </div>
 
         {/* Tabs */}
-        <div className="px-6 pt-3 flex gap-1 border-b border-gray-200">
+        <div className="px-6 pt-3 flex gap-1 border-b border-gray-200 dark:border-[#3A3F44]">
           <button
             onClick={() => setTab("po")}
             className={`px-4 py-2 text-sm font-medium rounded-t-lg -mb-px border border-b-0 transition ${
               tab === "po"
-                ? "bg-white text-blue-600 border-gray-200"
-                : "bg-gray-50 text-gray-500 border-transparent hover:text-gray-700"
+                ? "bg-white dark:bg-[#1D1F20] text-blue-600 dark:text-blue-400 border-gray-200 dark:border-[#3A3F44]"
+                : "bg-gray-50 dark:bg-[#15171A] text-gray-500 dark:text-[#9BA1A6] border-transparent hover:text-gray-700 dark:hover:text-[#C1C5C9]"
             }`}
           >
             Purchase Orders ({data?.poItems.length ?? 0})
@@ -174,8 +174,8 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
             onClick={() => setTab("voucher")}
             className={`px-4 py-2 text-sm font-medium rounded-t-lg -mb-px border border-b-0 transition ${
               tab === "voucher"
-                ? "bg-white text-purple-600 border-gray-200"
-                : "bg-gray-50 text-gray-500 border-transparent hover:text-gray-700"
+                ? "bg-white dark:bg-[#1D1F20] text-purple-600 dark:text-purple-400 border-gray-200 dark:border-[#3A3F44]"
+                : "bg-gray-50 dark:bg-[#15171A] text-gray-500 dark:text-[#9BA1A6] border-transparent hover:text-gray-700 dark:hover:text-[#C1C5C9]"
             }`}
           >
             Vouchers ({data?.voucherItems.length ?? 0})
@@ -184,8 +184,8 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
             onClick={() => setTab("acr")}
             className={`px-4 py-2 text-sm font-medium rounded-t-lg -mb-px border border-b-0 transition ${
               tab === "acr"
-                ? "bg-white text-orange-600 border-gray-200"
-                : "bg-gray-50 text-gray-500 border-transparent hover:text-gray-700"
+                ? "bg-white dark:bg-[#1D1F20] text-orange-600 dark:text-orange-400 border-gray-200 dark:border-[#3A3F44]"
+                : "bg-gray-50 dark:bg-[#15171A] text-gray-500 dark:text-[#9BA1A6] border-transparent hover:text-gray-700 dark:hover:text-[#C1C5C9]"
             }`}
           >
             ACR ({data?.acrItems.length ?? 0})
@@ -194,8 +194,8 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
             onClick={() => setTab("bc")}
             className={`px-4 py-2 text-sm font-medium rounded-t-lg -mb-px border border-b-0 transition ${
               tab === "bc"
-                ? "bg-white text-teal-600 border-gray-200"
-                : "bg-gray-50 text-gray-500 border-transparent hover:text-gray-700"
+                ? "bg-white dark:bg-[#1D1F20] text-teal-600 dark:text-teal-400 border-gray-200 dark:border-[#3A3F44]"
+                : "bg-gray-50 dark:bg-[#15171A] text-gray-500 dark:text-[#9BA1A6] border-transparent hover:text-gray-700 dark:hover:text-[#C1C5C9]"
             }`}
           >
             Budget Control ({data?.bcItems.length ?? 0})
@@ -207,14 +207,14 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
           {loading ? (
             <div className="text-center py-8">
               <div className="inline-block h-6 w-6 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent" />
-              <p className="mt-2 text-sm text-gray-500">Loading expenses...</p>
+              <p className="mt-2 text-sm text-gray-500 dark:text-[#9BA1A6]">Loading expenses...</p>
             </div>
           ) : tab === "po" ? (
             data && data.poItems.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
                   <thead>
-                    <tr className="text-left text-xs font-semibold text-gray-500 uppercase">
+                    <tr className="text-left text-xs font-semibold text-gray-500 dark:text-[#9BA1A6] uppercase">
                       <th className="pb-2 pr-3">Date</th>
                       <th className="pb-2 pr-3">PO #</th>
                       <th className="pb-2 pr-3">Supplier</th>
@@ -222,28 +222,28 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
                       <th className="pb-2 pr-3">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-gray-100 dark:divide-[#3A3F44]">
                     {data.poItems.map((po) => (
-                      <tr key={po.id} className="hover:bg-gray-50">
-                        <td className="py-2 pr-3 text-gray-600 whitespace-nowrap">
+                      <tr key={po.id} className="hover:bg-gray-50 dark:hover:bg-[#262A2E]">
+                        <td className="py-2 pr-3 text-gray-600 dark:text-[#9BA1A6] whitespace-nowrap">
                           {po.po_create_date}
                         </td>
-                        <td className="py-2 pr-3 font-mono text-gray-900">
+                        <td className="py-2 pr-3 font-mono text-gray-900 dark:text-[#E4E6E7]">
                           {po.po_full}
                         </td>
-                        <td className="py-2 pr-3 text-gray-700 max-w-[200px] truncate">
+                        <td className="py-2 pr-3 text-gray-700 dark:text-[#C1C5C9] max-w-[200px] truncate">
                           {po.supplier}
                         </td>
-                        <td className="py-2 pr-3 text-right font-mono font-medium text-gray-900">
+                        <td className="py-2 pr-3 text-right font-mono font-medium text-gray-900 dark:text-[#E4E6E7]">
                           {fmt(Number(po.total))}
                         </td>
                         <td className="py-2 pr-3">
                           {po.cancelled === "X" ? (
-                            <span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 rounded-full">
+                            <span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 rounded-full">
                               Cancelled
                             </span>
                           ) : (
-                            <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                            <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 rounded-full">
                               Active
                             </span>
                           )}
@@ -254,7 +254,7 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
                 </table>
               </div>
             ) : (
-              <p className="text-center py-8 text-gray-500">
+              <p className="text-center py-8 text-gray-500 dark:text-[#9BA1A6]">
                 No purchase orders found
               </p>
             )
@@ -263,7 +263,7 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead>
-                  <tr className="text-left text-xs font-semibold text-gray-500 uppercase">
+                  <tr className="text-left text-xs font-semibold text-gray-500 dark:text-[#9BA1A6] uppercase">
                     <th className="pb-2 pr-3">Date</th>
                     <th className="pb-2 pr-3">Voucher #</th>
                     <th className="pb-2 pr-3">Supplier</th>
@@ -272,29 +272,29 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
                     <th className="pb-2 pr-3">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-gray-100 dark:divide-[#3A3F44]">
                   {data.voucherItems.map((v) => (
-                    <tr key={v.id} className="hover:bg-gray-50">
-                      <td className="py-2 pr-3 text-gray-600 whitespace-nowrap">
+                    <tr key={v.id} className="hover:bg-gray-50 dark:hover:bg-[#262A2E]">
+                      <td className="py-2 pr-3 text-gray-600 dark:text-[#9BA1A6] whitespace-nowrap">
                         {v.produce_date}
                       </td>
-                      <td className="py-2 pr-3 font-mono text-gray-900">
+                      <td className="py-2 pr-3 font-mono text-gray-900 dark:text-[#E4E6E7]">
                         {v.voucher_full}
                       </td>
-                      <td className="py-2 pr-3 text-gray-700 max-w-[200px] truncate">
+                      <td className="py-2 pr-3 text-gray-700 dark:text-[#C1C5C9] max-w-[200px] truncate">
                         {v.supplier}
                       </td>
-                      <td className="py-2 pr-3 text-gray-600">{v.voucher_type}</td>
-                      <td className="py-2 pr-3 text-right font-mono font-medium text-gray-900">
+                      <td className="py-2 pr-3 text-gray-600 dark:text-[#9BA1A6]">{v.voucher_type}</td>
+                      <td className="py-2 pr-3 text-right font-mono font-medium text-gray-900 dark:text-[#E4E6E7]">
                         {fmt(Number(v.total))}
                       </td>
                       <td className="py-2 pr-3">
                         {v.cancelled === "X" ? (
-                          <span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 rounded-full">
+                          <span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 rounded-full">
                             Cancelled
                           </span>
                         ) : (
-                          <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                          <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 rounded-full">
                             Active
                           </span>
                         )}
@@ -305,7 +305,7 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
               </table>
             </div>
           ) : (
-            <p className="text-center py-8 text-gray-500">
+            <p className="text-center py-8 text-gray-500 dark:text-[#9BA1A6]">
               No vouchers found
             </p>
           )) : tab === "acr" ? (
@@ -313,7 +313,7 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead>
-                  <tr className="text-left text-xs font-semibold text-gray-500 uppercase">
+                  <tr className="text-left text-xs font-semibold text-gray-500 dark:text-[#9BA1A6] uppercase">
                     <th className="pb-2 pr-3">Date</th>
                     <th className="pb-2 pr-3">Voucher #</th>
                     <th className="pb-2 pr-3 text-right">Amount</th>
@@ -321,28 +321,28 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
                     <th className="pb-2 pr-3">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-gray-100 dark:divide-[#3A3F44]">
                   {data.acrItems.map((a) => (
-                    <tr key={a.id} className="hover:bg-gray-50">
-                      <td className="py-2 pr-3 text-gray-600 whitespace-nowrap">
+                    <tr key={a.id} className="hover:bg-gray-50 dark:hover:bg-[#262A2E]">
+                      <td className="py-2 pr-3 text-gray-600 dark:text-[#9BA1A6] whitespace-nowrap">
                         {a.produce_date}
                       </td>
-                      <td className="py-2 pr-3 font-mono text-gray-900">
+                      <td className="py-2 pr-3 font-mono text-gray-900 dark:text-[#E4E6E7]">
                         {a.voucher_full}
                       </td>
-                      <td className="py-2 pr-3 text-right font-mono font-medium text-gray-900">
+                      <td className="py-2 pr-3 text-right font-mono font-medium text-gray-900 dark:text-[#E4E6E7]">
                         {fmt(Number(a.total))}
                       </td>
-                      <td className="py-2 pr-3 text-gray-600 max-w-[200px] truncate">
+                      <td className="py-2 pr-3 text-gray-600 dark:text-[#9BA1A6] max-w-[200px] truncate">
                         {a.remarks}
                       </td>
                       <td className="py-2 pr-3">
                         {a.cancelled === "X" ? (
-                          <span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 rounded-full">
+                          <span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 rounded-full">
                             Cancelled
                           </span>
                         ) : (
-                          <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                          <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 rounded-full">
                             Active
                           </span>
                         )}
@@ -353,14 +353,14 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
               </table>
             </div>
           ) : (
-            <p className="text-center py-8 text-gray-500">
+            <p className="text-center py-8 text-gray-500 dark:text-[#9BA1A6]">
               No ACR records found
             </p>
           )) : data && data.bcItems.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead>
-                  <tr className="text-left text-xs font-semibold text-gray-500 uppercase">
+                  <tr className="text-left text-xs font-semibold text-gray-500 dark:text-[#9BA1A6] uppercase">
                     <th className="pb-2 pr-3">Date</th>
                     <th className="pb-2 pr-3">BC No</th>
                     <th className="pb-2 pr-3">Type</th>
@@ -368,39 +368,39 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
                     <th className="pb-2 pr-3 text-right">Effect</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-gray-100 dark:divide-[#3A3F44]">
                   {data.bcItems.map((bc) => (
-                    <tr key={bc.id} className="hover:bg-gray-50">
-                      <td className="py-2 pr-3 text-gray-600 whitespace-nowrap">
+                    <tr key={bc.id} className="hover:bg-gray-50 dark:hover:bg-[#262A2E]">
+                      <td className="py-2 pr-3 text-gray-600 dark:text-[#9BA1A6] whitespace-nowrap">
                         {bc.budget_control_date}
                       </td>
-                      <td className="py-2 pr-3 font-mono text-gray-900">
+                      <td className="py-2 pr-3 font-mono text-gray-900 dark:text-[#E4E6E7]">
                         {bc.budget_control_no}
                       </td>
                       <td className="py-2 pr-3">
                         {bc.side === "credit" ? (
-                          <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                          <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 rounded-full">
                             Credit (+)
                           </span>
                         ) : (
-                          <span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 rounded-full">
+                          <span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 rounded-full">
                             Debit (-)
                           </span>
                         )}
                       </td>
-                      <td className="py-2 pr-3 text-right font-mono font-medium text-gray-900">
+                      <td className="py-2 pr-3 text-right font-mono font-medium text-gray-900 dark:text-[#E4E6E7]">
                         {fmt(Number(bc.amount))}
                       </td>
-                      <td className={`py-2 pr-3 text-right font-mono font-medium ${bc.effect > 0 ? "text-green-600" : "text-red-600"}`}>
+                      <td className={`py-2 pr-3 text-right font-mono font-medium ${bc.effect > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
                         {bc.effect > 0 ? "+" : ""}{fmt(bc.effect)}
                       </td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr className="border-t-2 border-gray-200">
-                    <td colSpan={4} className="py-2 pr-3 text-right text-xs font-semibold text-gray-500 uppercase">Net Effect</td>
-                    <td className={`py-2 pr-3 text-right font-mono font-bold ${(data.bcNet || 0) >= 0 ? "text-green-600" : "text-red-600"}`}>
+                  <tr className="border-t-2 border-gray-200 dark:border-[#4A4F54]">
+                    <td colSpan={4} className="py-2 pr-3 text-right text-xs font-semibold text-gray-500 dark:text-[#9BA1A6] uppercase">Net Effect</td>
+                    <td className={`py-2 pr-3 text-right font-mono font-bold ${(data.bcNet || 0) >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
                       {(data.bcNet || 0) > 0 ? "+" : ""}{fmt(data.bcNet || 0)}
                     </td>
                   </tr>
@@ -408,7 +408,7 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
               </table>
             </div>
           ) : (
-            <p className="text-center py-8 text-gray-500">
+            <p className="text-center py-8 text-gray-500 dark:text-[#9BA1A6]">
               No budget control records found
             </p>
           )}

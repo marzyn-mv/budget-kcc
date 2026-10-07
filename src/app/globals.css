@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @font-face {
   font-family: "MV Funa";
   src: url("/fonts/MV Funa_Light.ttf") format("truetype");
@@ -54,10 +56,54 @@ body {
   font-family: var(--font-dhivehi);
 }
 
+/*
+ * Cloudflare-inspired dark theme
+ * Overrides Tailwind gray scale to warm-neutral Cloudflare tones
+ * bg:   #15171A  surface: #1D1F20  elevated: #262A2E
+ * border: #3A3F44  muted text: #9BA1A6  text: #E4E6E7
+ */
+.dark {
+  --background: #15171A;
+  --foreground: #E4E6E7;
+  color-scheme: dark;
+}
+
+/* Page background */
+.dark body {
+  background: #15171A;
+}
+
+/* Surface: cards, tables, inputs — map gray-800 usage */
+@layer base {
+  .dark .bg-gray-800 { background-color: #1D1F20; }
+  .dark .bg-gray-900 { background-color: #15171A; }
+  .dark .bg-gray-950 { background-color: #111315; }
+  .dark .bg-gray-50  { background-color: #1D1F20; }
+
+  /* Hover surfaces */
+  .dark .hover\:bg-gray-800:hover { background-color: #262A2E; }
+  .dark .hover\:bg-gray-50:hover  { background-color: #262A2E; }
+
+  /* Borders — warm neutral */
+  .dark .border-gray-700 { border-color: #3A3F44; }
+  .dark .border-gray-600 { border-color: #4A4F54; }
+  .dark .divide-gray-700 > :not(:last-child) { border-color: #3A3F44; }
+
+  /* Text — Cloudflare palette */
+  .dark .text-white      { color: #E4E6E7; }
+  .dark .text-gray-100   { color: #E4E6E7; }
+  .dark .text-gray-300   { color: #C1C5C9; }
+  .dark .text-gray-400   { color: #9BA1A6; }
+}
+
 select.select-styled {
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
   background-size: 16px;
+}
+
+.dark select.select-styled {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239BA1A6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 }

@@ -43,18 +43,18 @@ export default function UploadPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <div className="bg-white rounded-xl shadow-lg p-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-2">
+      <div className="bg-white dark:bg-[#1D1F20] rounded-xl shadow-lg p-8">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-[#E4E6E7] mb-2">
           Upload Budget Excel
         </h2>
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-sm text-gray-500 dark:text-[#9BA1A6] mb-6">
           Upload an Excel file (.xlsx) with budget data. This will replace all
           existing budget items. Expected columns: ActCodeID, ActiveID, Fund,
           ActivityDetail, Prog, CenterName, GLCode, Budget
         </p>
 
         <form onSubmit={handleUpload}>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-4">
+          <div className="border-2 border-dashed border-gray-300 dark:border-[#3A3F44] rounded-lg p-8 text-center mb-4">
             <input
               type="file"
               accept=".xlsx,.xls"
@@ -67,11 +67,11 @@ export default function UploadPage() {
               className="cursor-pointer"
             >
               <div className="text-4xl mb-3">📄</div>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-[#9BA1A6]">
                 {file ? file.name : "Click to select Excel file"}
               </p>
               {file && (
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-[#9BA1A6] mt-1">
                   {(file.size / 1024).toFixed(1)} KB
                 </p>
               )}

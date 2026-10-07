@@ -139,8 +139,8 @@ export default function SectionsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Sections</h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-[#E4E6E7]">Sections</h2>
+          <p className="text-sm text-gray-500 dark:text-[#9BA1A6] mt-1">
             {sections.length} section{sections.length !== 1 ? "s" : ""}
           </p>
         </div>
@@ -149,7 +149,7 @@ export default function SectionsPage() {
             <button
               onClick={handleSeed}
               disabled={seeding}
-              className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 dark:border-[#3A3F44] text-gray-700 dark:text-[#C1C5C9] rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-[#262A2E] transition disabled:opacity-50"
             >
               <DatabaseZap className="w-4 h-4" />
               {seeding ? "Seeding..." : "Load Existing"}
@@ -167,13 +167,13 @@ export default function SectionsPage() {
 
       {/* Alerts */}
       {message && (
-        <div className="mb-4 px-4 py-3 bg-green-50 border border-green-200 text-green-800 rounded-lg text-sm flex items-center justify-between">
+        <div className="mb-4 px-4 py-3 bg-green-50 dark:bg-green-900/15 border border-green-200 dark:border-green-800/50 text-green-800 dark:text-green-300 rounded-lg text-sm flex items-center justify-between">
           {message}
           <button onClick={() => setMessage("")}><X className="w-4 h-4" /></button>
         </div>
       )}
       {error && !showModal && (
-        <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm flex items-center justify-between">
+        <div className="mb-4 px-4 py-3 bg-red-50 dark:bg-red-900/15 border border-red-200 dark:border-red-800/50 text-red-800 dark:text-red-300 rounded-lg text-sm flex items-center justify-between">
           {error}
           <button onClick={() => setError("")}><X className="w-4 h-4" /></button>
         </div>
@@ -188,7 +188,7 @@ export default function SectionsPage() {
             placeholder="Search sections..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            className="w-full pl-9 pr-4 py-2 border border-gray-300 dark:border-[#3A3F44] rounded-lg text-sm bg-white dark:bg-[#15171A] dark:text-[#E4E6E7] focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           />
         </div>
       </div>
@@ -199,32 +199,32 @@ export default function SectionsPage() {
           <div className="inline-block h-7 w-7 animate-spin rounded-full border-[3px] border-solid border-blue-600 border-r-transparent" />
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="bg-white dark:bg-[#1D1F20] rounded-xl border border-gray-200 dark:border-[#3A3F44] overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-[#3A3F44]">
+            <thead className="bg-gray-50 dark:bg-[#262A2E]">
               <tr>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase w-12">#</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Section Name</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase w-24">Actions</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase w-12">#</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase">Section Name</th>
+                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase w-24">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-[#3A3F44]">
               {filtered.map((item, index) => (
-                <tr key={item.id} className="hover:bg-gray-50">
-                  <td className="px-5 py-3 text-xs text-gray-400">{index + 1}</td>
-                  <td className="px-4 py-3 text-sm text-gray-900 font-medium">{item.name}</td>
+                <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-[#262A2E]">
+                  <td className="px-5 py-3 text-xs text-gray-400 dark:text-[#9BA1A6]">{index + 1}</td>
+                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-[#E4E6E7] font-medium">{item.name}</td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={() => openEdit(item)}
-                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition"
+                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition"
                         title="Edit"
                       >
                         <Pencil className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setDeleteId(item.id)}
-                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition"
+                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition"
                         title="Delete"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -236,7 +236,7 @@ export default function SectionsPage() {
             </tbody>
           </table>
           {filtered.length === 0 && (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-gray-500 dark:text-[#9BA1A6]">
               {search ? "No sections match your search" : "No sections added yet. Click \"Load Existing\" to seed from budget data."}
             </div>
           )}
@@ -246,16 +246,16 @@ export default function SectionsPage() {
       {/* Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">
+          <div className="bg-white dark:bg-[#1D1F20] rounded-xl shadow-xl max-w-sm w-full">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-[#3A3F44]">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-[#E4E6E7]">
                 {editingId ? "Edit Section" : "Add Section"}
               </h3>
             </div>
             <form onSubmit={handleSave}>
               <div className="px-6 py-4">
                 {error && (
-                  <div className="mb-3 px-3 py-2 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm">
+                  <div className="mb-3 px-3 py-2 bg-red-50 dark:bg-red-900/15 border border-red-200 dark:border-red-800/50 text-red-800 dark:text-red-300 rounded-lg text-sm">
                     {error}
                   </div>
                 )}
@@ -267,16 +267,16 @@ export default function SectionsPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Admin"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-[#3A3F44] dark:bg-[#15171A] dark:text-[#E4E6E7] rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   required
                   autoFocus
                 />
               </div>
-              <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+              <div className="px-6 py-4 border-t border-gray-200 dark:border-[#3A3F44] flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                  className="px-4 py-2 text-sm text-gray-700 dark:text-[#C1C5C9] border border-gray-300 dark:border-[#3A3F44] rounded-lg hover:bg-gray-50 dark:hover:bg-[#262A2E] transition"
                 >
                   Cancel
                 </button>
@@ -296,15 +296,15 @@ export default function SectionsPage() {
       {/* Delete Confirm */}
       {deleteId && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Section</h3>
-            <p className="text-sm text-gray-600 mb-6">
+          <div className="bg-white dark:bg-[#1D1F20] rounded-xl shadow-xl max-w-sm w-full p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-[#E4E6E7] mb-2">Delete Section</h3>
+            <p className="text-sm text-gray-600 dark:text-[#9BA1A6] mb-6">
               Are you sure? This cannot be undone.
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setDeleteId(null)}
-                className="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                className="px-4 py-2 text-sm text-gray-700 dark:text-[#C1C5C9] border border-gray-300 dark:border-[#3A3F44] rounded-lg hover:bg-gray-50 dark:hover:bg-[#262A2E] transition"
               >
                 Cancel
               </button>

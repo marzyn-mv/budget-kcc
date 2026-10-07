@@ -96,10 +96,10 @@ export default function HomePage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-[#E4E6E7] mb-2">
             Budget Overview
           </h2>
-          <p className="text-gray-500">
+          <p className="text-gray-500 dark:text-[#9BA1A6]">
             Explore the approved budget allocation for Kulhudhuffushi City Council
             2026
           </p>
@@ -118,10 +118,10 @@ export default function HomePage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm animate-pulse">
-                <div className="h-4 bg-gray-200 rounded w-24 mb-2" />
-                <div className="h-7 bg-gray-200 rounded w-36 mb-1" />
-                <div className="h-3 bg-gray-100 rounded w-16 mt-1" />
+              <div key={i} className="bg-white dark:bg-[#1D1F20] rounded-xl border border-gray-200 dark:border-[#3A3F44] p-5 shadow-sm animate-pulse">
+                <div className="h-4 bg-gray-200 dark:bg-[#262A2E] rounded w-24 mb-2" />
+                <div className="h-7 bg-gray-200 dark:bg-[#262A2E] rounded w-36 mb-1" />
+                <div className="h-3 bg-gray-100 dark:bg-[#262A2E] rounded w-16 mt-1" />
               </div>
             ))}
           </div>
@@ -137,23 +137,23 @@ export default function HomePage() {
               onClick={() => handleFundChange(fund === f.fund ? "" : f.fund)}
               className={`p-4 rounded-lg border text-left transition ${
                 fund === f.fund
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-200 bg-white hover:border-gray-300"
+                  ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400"
+                  : "border-gray-200 dark:border-[#3A3F44] bg-white dark:bg-[#1D1F20] hover:border-gray-300 dark:hover:border-[#4A4F54]"
               }`}
             >
-              <p className="text-xs font-medium text-gray-500 mb-1">{f.fund}</p>
-              <p className="text-sm font-bold text-gray-900">
+              <p className="text-xs font-medium text-gray-500 dark:text-[#9BA1A6] mb-1">{f.fund}</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-[#E4E6E7]">
                 {new Intl.NumberFormat("en-US", {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 }).format(f.total)}
               </p>
-              <p className="text-xs text-gray-500 mt-1">{f.count} items</p>
+              <p className="text-xs text-gray-500 dark:text-[#9BA1A6] mt-1">{f.count} items</p>
             </button>
           ))
         ) : (
           [...Array(6)].map((_, i) => (
-            <div key={i} className="p-4 rounded-lg border border-gray-200 bg-white animate-pulse">
+            <div key={i} className="p-4 rounded-lg border border-gray-200 dark:border-[#3A3F44] bg-white dark:bg-[#1D1F20] animate-pulse">
               <div className="h-3 bg-gray-200 rounded w-12 mb-2" />
               <div className="h-4 bg-gray-200 rounded w-20 mb-1" />
               <div className="h-3 bg-gray-100 rounded w-14" />
@@ -181,11 +181,11 @@ export default function HomePage() {
       {loading ? (
         <div className="text-center py-12">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-          <p className="mt-3 text-gray-500">Loading budget data...</p>
+          <p className="mt-3 text-gray-500 dark:text-[#9BA1A6]">Loading budget data...</p>
         </div>
       ) : (
         <>
-          <div className="mb-3 text-sm text-gray-500">
+          <div className="mb-3 text-sm text-gray-500 dark:text-[#9BA1A6]">
             Showing {data?.items.length} of {data?.total} items
           </div>
           <BudgetTable items={data?.items || []} onItemClick={setSelectedItem} />

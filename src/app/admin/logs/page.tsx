@@ -24,16 +24,16 @@ export default function LogsPage() {
   }, [page, levelFilter]);
 
   const levelColors: Record<string, string> = {
-    info: "bg-blue-100 text-blue-800",
-    warn: "bg-yellow-100 text-yellow-800",
-    error: "bg-red-100 text-red-800",
+    info: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+    warn: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
+    error: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
   };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">System Logs</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-[#E4E6E7]">System Logs</h2>
         </div>
         <select
           value={levelFilter}
@@ -41,7 +41,7 @@ export default function LogsPage() {
             setLevelFilter(e.target.value);
             setPage(1);
           }}
-          className="px-4 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+          className="px-4 py-2 border border-gray-300 dark:border-[#3A3F44] rounded-lg text-sm bg-white dark:bg-[#1D1F20] dark:text-[#E4E6E7]"
         >
           <option value="">All Levels</option>
           <option value="info">Info</option>
@@ -50,31 +50,31 @@ export default function LogsPage() {
         </select>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="bg-white dark:bg-[#1D1F20] rounded-xl border border-gray-200 dark:border-[#3A3F44] overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-[#3A3F44]">
+          <thead className="bg-gray-50 dark:bg-[#262A2E]">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase">
                 Time
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase">
                 Level
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase">
                 Action
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase">
                 Details
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase">
                 IP
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-200 dark:divide-[#3A3F44]">
             {logs.map((log) => (
-              <tr key={log.id} className="hover:bg-gray-50">
-                <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
+              <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-[#262A2E]">
+                <td className="px-4 py-3 text-sm text-gray-600 dark:text-[#9BA1A6] whitespace-nowrap">
                   {log.created_at}
                 </td>
                 <td className="px-4 py-3">
@@ -84,13 +84,13 @@ export default function LogsPage() {
                     {log.level}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-900">
+                <td className="px-4 py-3 text-sm text-gray-900 dark:text-[#E4E6E7]">
                   {log.action}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-600 max-w-md truncate">
+                <td className="px-4 py-3 text-sm text-gray-600 dark:text-[#9BA1A6] max-w-md truncate">
                   {log.details}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-500">
+                <td className="px-4 py-3 text-sm text-gray-500 dark:text-[#9BA1A6]">
                   {log.ip || "-"}
                 </td>
               </tr>
@@ -98,7 +98,7 @@ export default function LogsPage() {
           </tbody>
         </table>
         {logs.length === 0 && (
-          <div className="text-center py-12 text-gray-500">No logs found</div>
+          <div className="text-center py-12 text-gray-500 dark:text-[#9BA1A6]">No logs found</div>
         )}
       </div>
 
@@ -107,17 +107,17 @@ export default function LogsPage() {
           <button
             onClick={() => setPage(page - 1)}
             disabled={page <= 1}
-            className="px-3 py-2 text-sm border rounded-lg hover:bg-gray-50 disabled:opacity-50"
+            className="px-3 py-2 text-sm border dark:border-[#3A3F44] rounded-lg hover:bg-gray-50 dark:hover:bg-[#262A2E] disabled:opacity-50"
           >
             Previous
           </button>
-          <span className="text-sm text-gray-600 px-3">
+          <span className="text-sm text-gray-600 dark:text-[#9BA1A6] px-3">
             Page {page} of {totalPages}
           </span>
           <button
             onClick={() => setPage(page + 1)}
             disabled={page >= totalPages}
-            className="px-3 py-2 text-sm border rounded-lg hover:bg-gray-50 disabled:opacity-50"
+            className="px-3 py-2 text-sm border dark:border-[#3A3F44] rounded-lg hover:bg-gray-50 dark:hover:bg-[#262A2E] disabled:opacity-50"
           >
             Next
           </button>

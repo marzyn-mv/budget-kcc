@@ -35,14 +35,14 @@ export default function SearchFilters({
           placeholder="Search activities, GL codes..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
+          className="w-full px-4 py-2.5 border border-gray-300 dark:border-[#3A3F44] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm bg-white dark:bg-[#1D1F20] dark:text-[#E4E6E7] dark:placeholder-[#9BA1A6]"
         />
       </div>
       <select
         value={fund}
         onChange={(e) => onFundChange(e.target.value)}
         aria-label="Filter by fund"
-        className="select-styled w-full pl-4 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm bg-white cursor-pointer"
+        className="select-styled w-full pl-4 pr-10 py-2.5 border border-gray-300 dark:border-[#3A3F44] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm bg-white dark:bg-[#1D1F20] dark:text-[#E4E6E7] cursor-pointer"
       >
         <option value="">All Funds</option>
         {funds.map((f) => (
@@ -55,7 +55,7 @@ export default function SearchFilters({
         value={section}
         onChange={(e) => onSectionChange(e.target.value)}
         aria-label="Filter by section"
-        className="select-styled w-full pl-4 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm bg-white cursor-pointer"
+        className="select-styled w-full pl-4 pr-10 py-2.5 border border-gray-300 dark:border-[#3A3F44] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm bg-white dark:bg-[#1D1F20] dark:text-[#E4E6E7] cursor-pointer"
       >
         <option value="">All Sections</option>
         {sections.map((s) => (
@@ -68,7 +68,7 @@ export default function SearchFilters({
         value={center}
         onChange={(e) => onCenterChange(e.target.value)}
         aria-label="Filter by center"
-        className="select-styled w-full pl-4 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm bg-white cursor-pointer"
+        className="select-styled w-full pl-4 pr-10 py-2.5 border border-gray-300 dark:border-[#3A3F44] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm bg-white dark:bg-[#1D1F20] dark:text-[#E4E6E7] cursor-pointer"
       >
         <option value="">All Centers</option>
         {centers.map((c) => (

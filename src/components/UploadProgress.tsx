@@ -47,12 +47,12 @@ export default function UploadProgress({ active }: Props) {
   return (
     <div className="mt-3">
       <div className="flex items-center justify-between mb-1">
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-gray-500 dark:text-[#9BA1A6]">
           {progress < 100 ? "Processing file..." : "Complete!"}
         </p>
-        <p className="text-xs font-medium text-gray-700">{progress}%</p>
+        <p className="text-xs font-medium text-gray-700 dark:text-[#C1C5C9]">{progress}%</p>
       </div>
-      <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+      <div className="w-full bg-gray-200 dark:bg-[#3A3F44] rounded-full h-3 overflow-hidden">
         <div
           className={`h-3 rounded-full transition-all duration-300 ease-out ${
             progress < 100

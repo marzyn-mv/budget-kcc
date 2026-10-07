@@ -57,13 +57,13 @@ export default function AdminLayout({
   if (!authenticated) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="bg-white rounded-xl shadow-lg p-8 max-w-sm w-full mx-4">
+        <div className="bg-white dark:bg-[#1D1F20] rounded-xl shadow-lg p-8 max-w-sm w-full mx-4">
           <div className="text-center mb-6">
             <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-3">
               <Lock className="w-5 h-5 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-gray-900">Admin Access</h2>
-            <p className="text-sm text-gray-500 mt-1">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-[#E4E6E7]">Admin Access</h2>
+            <p className="text-sm text-gray-500 dark:text-[#9BA1A6] mt-1">
               Enter access code to continue
             </p>
           </div>
@@ -73,7 +73,7 @@ export default function AdminLayout({
               value={accessCode}
               onChange={(e) => setAccessCode(e.target.value)}
               placeholder="Access code"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm mb-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              className="w-full px-4 py-2.5 border border-gray-300 dark:border-[#3A3F44] dark:bg-[#15171A] dark:text-[#E4E6E7] rounded-lg text-sm mb-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               autoFocus
             />
             {loginError && (
