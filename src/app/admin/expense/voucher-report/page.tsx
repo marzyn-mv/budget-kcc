@@ -132,7 +132,9 @@ export default function VoucherReportPage() {
       });
       const d = await res.json();
       if (res.ok) {
-        setMessage(`Imported ${d.rowsImported} voucher records`);
+        setMessage(d.duplicatesSkipped > 0
+          ? `Imported ${d.rowsImported} voucher records. ${d.duplicatesSkipped} duplicates skipped.`
+          : `Imported ${d.rowsImported} voucher records`);
         setFile(null);
         fetchData();
       } else {

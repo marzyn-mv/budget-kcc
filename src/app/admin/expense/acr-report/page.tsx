@@ -127,7 +127,9 @@ export default function ACRReportPage() {
       });
       const d = await res.json();
       if (res.ok) {
-        setMessage(`Imported ${d.rowsImported} ACR records`);
+        setMessage(d.duplicatesSkipped > 0
+          ? `Imported ${d.rowsImported} ACR records. ${d.duplicatesSkipped} duplicates skipped.`
+          : `Imported ${d.rowsImported} ACR records`);
         setFile(null);
         fetchData();
       } else {

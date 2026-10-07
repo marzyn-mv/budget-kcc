@@ -27,7 +27,9 @@ export default function UploadPage() {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage(`Successfully imported ${data.rowsImported} budget items`);
+        setMessage(data.duplicatesSkipped > 0
+          ? `Imported ${data.rowsImported} budget items. ${data.duplicatesSkipped} duplicates skipped.`
+          : `Successfully imported ${data.rowsImported} budget items`);
         setFile(null);
       } else {
         setError(data.error || "Upload failed");

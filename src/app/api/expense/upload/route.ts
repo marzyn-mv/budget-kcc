@@ -34,25 +34,63 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Empty file" }, { status: 400 });
     }
 
+    const excelDateToStr = (v: unknown): string => {
+      if (!v) return "";
+      const num = Number(v);
+      if (!isNaN(num) && num > 10000) {
+        const d = new Date((num - 25569) * 86400 * 1000);
+        return d.toISOString().split("T")[0];
+      }
+      return String(v);
+    };
+
+    // --- Duplicate detection per type ---
+    let existingKeys: Set<string>;
+    let makeKey: (row: Record<string, unknown>) => string;
+    let dbKeyQuery: string;
+    let dbKeyBuilder: (r: Record<string, string>) => string;
+
+    if (type === "po-report") {
+      dbKeyQuery = `SELECT po_full FROM po_reports`;
+      dbKeyBuilder = (r) => r.po_full;
+      makeKey = (row) => String(row.PoFull || "");
+    } else if (type === "voucher-report") {
+      dbKeyQuery = `SELECT voucher_full FROM voucher_reports`;
+      dbKeyBuilder = (r) => r.voucher_full;
+      makeKey = (row) => String(row.VoucherFull || "");
+    } else if (type === "acr-report") {
+      dbKeyQuery = `SELECT voucher_full FROM acr_reports`;
+      dbKeyBuilder = (r) => r.voucher_full;
+      makeKey = (row) => String(row.VoucherFull || "");
+    } else {
+      // budget-control
+      dbKeyQuery = `SELECT budget_control_no FROM budget_controls`;
+      dbKeyBuilder = (r) => r.budget_control_no;
+      makeKey = (row) => String(row["Budget Control No"] || "");
+    }
+
+    const existingResult = await query<Record<string, string>>(dbKeyQuery);
+    existingKeys = new Set(existingResult.rows.map(dbKeyBuilder));
+
+    const newRows = rows.filter((row) => !existingKeys.has(makeKey(row)));
+    const skippedCount = rows.length - newRows.length;
+
+    if (newRows.length === 0) {
+      return NextResponse.json(
+        { error: "All records already exist. No new data was imported.", skipped: skippedCount },
+        { status: 409 }
+      );
+    }
+
     const uploadResult = await query<{ id: number }>(
       `INSERT INTO upload_history (filename, rows_imported, uploaded_by) VALUES ($1, $2, 'admin') RETURNING id`,
-      [file.name, rows.length]
+      [file.name, newRows.length]
     );
     const uploadId = uploadResult.rows[0].id;
 
     if (type === "budget-control") {
-      const excelDateToStr = (v: unknown): string => {
-        if (!v) return "";
-        const num = Number(v);
-        if (!isNaN(num) && num > 10000) {
-          const d = new Date((num - 25569) * 86400 * 1000);
-          return d.toISOString().split("T")[0];
-        }
-        return String(v);
-      };
-
-      for (let i = 0; i < rows.length; i += BATCH_SIZE) {
-        const batch = rows.slice(i, i + BATCH_SIZE);
+      for (let i = 0; i < newRows.length; i += BATCH_SIZE) {
+        const batch = newRows.slice(i, i + BATCH_SIZE);
         const values: string[] = [];
         const params: (string | number)[] = [];
         let idx = 1;
@@ -87,8 +125,8 @@ export async function POST(req: NextRequest) {
         );
       }
     } else if (type === "acr-report") {
-      for (let i = 0; i < rows.length; i += BATCH_SIZE) {
-        const batch = rows.slice(i, i + BATCH_SIZE);
+      for (let i = 0; i < newRows.length; i += BATCH_SIZE) {
+        const batch = newRows.slice(i, i + BATCH_SIZE);
         const values: string[] = [];
         const params: (string | number)[] = [];
         let idx = 1;
@@ -126,8 +164,8 @@ export async function POST(req: NextRequest) {
         );
       }
     } else if (type === "po-report") {
-      for (let i = 0; i < rows.length; i += BATCH_SIZE) {
-        const batch = rows.slice(i, i + BATCH_SIZE);
+      for (let i = 0; i < newRows.length; i += BATCH_SIZE) {
+        const batch = newRows.slice(i, i + BATCH_SIZE);
         const values: string[] = [];
         const params: (string | number)[] = [];
         let idx = 1;
@@ -164,8 +202,8 @@ export async function POST(req: NextRequest) {
         );
       }
     } else {
-      for (let i = 0; i < rows.length; i += BATCH_SIZE) {
-        const batch = rows.slice(i, i + BATCH_SIZE);
+      for (let i = 0; i < newRows.length; i += BATCH_SIZE) {
+        const batch = newRows.slice(i, i + BATCH_SIZE);
         const values: string[] = [];
         const params: (string | number)[] = [];
         let idx = 1;
@@ -208,13 +246,21 @@ export async function POST(req: NextRequest) {
     }
 
     await invalidateCache("budget:*");
+    await invalidateCache("expense:*");
+    await invalidateCache("uploads:*");
 
-    await addLog("info", `${type}_upload`, `Uploaded ${file.name}: ${rows.length} rows`);
-    logger.info(`${type} uploaded`, { filename: file.name, rows: rows.length });
+    const msg = skippedCount > 0
+      ? `Uploaded ${file.name}: ${newRows.length} new rows, ${skippedCount} duplicates skipped`
+      : `Uploaded ${file.name}: ${newRows.length} rows`;
+    await addLog("info", `${type}_upload`, msg);
+    logger.info(`${type} uploaded`, { filename: file.name, imported: newRows.length, skipped: skippedCount });
 
     return NextResponse.json({
-      message: "Upload successful",
-      rowsImported: rows.length,
+      message: skippedCount > 0
+        ? `${newRows.length} new rows imported. ${skippedCount} duplicate rows were skipped.`
+        : "Upload successful",
+      rowsImported: newRows.length,
+      duplicatesSkipped: skippedCount,
     });
   } catch (error) {
     logger.error("Expense upload failed", { error });

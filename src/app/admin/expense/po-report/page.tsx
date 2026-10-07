@@ -128,7 +128,9 @@ export default function POReportPage() {
       });
       const d = await res.json();
       if (res.ok) {
-        setMessage(`Imported ${d.rowsImported} PO records`);
+        setMessage(d.duplicatesSkipped > 0
+          ? `Imported ${d.rowsImported} PO records. ${d.duplicatesSkipped} duplicates skipped.`
+          : `Imported ${d.rowsImported} PO records`);
         setFile(null);
         fetchData();
       } else {

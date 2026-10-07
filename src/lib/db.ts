@@ -82,6 +82,13 @@ async function ensureTables() {
     await sql`CREATE INDEX IF NOT EXISTS idx_bc_cr ON budget_controls(cr_activity, cr_gl_code)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_bc_dr ON budget_controls(dr_activity, dr_gl_code)`;
 
+    await sql`CREATE TABLE IF NOT EXISTS gl_codes (
+      id SERIAL PRIMARY KEY, gl_code TEXT NOT NULL UNIQUE,
+      name_en TEXT NOT NULL DEFAULT '', name_dv TEXT NOT NULL DEFAULT '',
+      details TEXT DEFAULT '',
+      created_at TIMESTAMP DEFAULT NOW(), updated_at TIMESTAMP DEFAULT NOW())`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_gl_codes_code ON gl_codes(gl_code)`;
+
     initialized = true;
   })();
 

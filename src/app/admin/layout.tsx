@@ -94,7 +94,7 @@ export default function AdminLayout({
   return (
     <div className="min-h-screen">
       <AdminSidebar onLogout={handleLogout} />
-      <div className="md:pl-56 pb-20 md:pb-0">{children}</div>
+      <div className="md:pl-60 pb-20 md:pb-0">{children}</div>
     </div>
   );
 }

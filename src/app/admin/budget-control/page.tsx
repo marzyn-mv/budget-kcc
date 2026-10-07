@@ -132,7 +132,9 @@ export default function BudgetControlPage() {
       });
       const d = await res.json();
       if (res.ok) {
-        setMessage(`Imported ${d.rowsImported} budget control records`);
+        setMessage(d.duplicatesSkipped > 0
+          ? `Imported ${d.rowsImported} budget control records. ${d.duplicatesSkipped} duplicates skipped.`
+          : `Imported ${d.rowsImported} budget control records`);
         setFile(null);
         fetchData();
       } else {
