@@ -1,6 +1,45 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { BudgetItem } from "@/lib/types";
+
+function GlTooltip({ code, name }: { code: string; name?: string }) {
+  const [show, setShow] = useState(false);
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  const handleEnter = () => {
+    if (!name) return;
+    const rect = ref.current?.getBoundingClientRect();
+    if (rect) {
+      setPos({ x: rect.left + rect.width / 2, y: rect.top });
+    }
+    setShow(true);
+  };
+
+  return (
+    <span
+      ref={ref}
+      className="relative cursor-default underline decoration-dotted decoration-gray-400 dark:decoration-gray-500 underline-offset-2"
+      onMouseEnter={handleEnter}
+      onMouseLeave={() => setShow(false)}
+    >
+      {code}
+      {show && name && pos && (
+        <span
+          className="fixed z-50 pointer-events-none animate-in fade-in duration-150"
+          style={{ left: pos.x, top: pos.y - 8, transform: "translate(-50%, -100%)" }}
+        >
+          <span className="block max-w-72 px-3 py-2 rounded-lg bg-gray-900 dark:bg-[#2A2E33] text-white dark:text-[#E4E6E7] text-xs leading-relaxed shadow-lg border border-gray-700 dark:border-[#3A3F44]">
+            <span className="block font-mono text-[10px] text-gray-400 dark:text-[#7A8086] mb-1 ltr">{code}</span>
+            <span className="block font-medium text-sm leading-snug" dir="rtl" style={{ fontFamily: "var(--font-dhivehi)" }}>{name}</span>
+          </span>
+          <span className="block w-2 h-2 mx-auto -mt-[3px] rotate-45 bg-gray-900 dark:bg-[#2A2E33] border-r border-b border-gray-700 dark:border-[#3A3F44]" />
+        </span>
+      )}
+    </span>
+  );
+}
 
 interface Props {
   items: BudgetItem[];
@@ -30,6 +69,21 @@ export default function BudgetTable({
   selectedIds,
   onSelectionChange,
 }: Props) {
+  const [glNames, setGlNames] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch("/api/gl-codes/public?limit=9999")
+      .then((r) => r.json())
+      .then((data) => {
+        const map: Record<string, string> = {};
+        for (const g of data.glCodes || []) {
+          map[g.gl_code] = g.name_en || g.name_dv || "";
+        }
+        setGlNames(map);
+      })
+      .catch(() => {});
+  }, []);
+
   const allSelected =
     items.length > 0 && selectedIds ? items.every((i) => selectedIds.has(i.id)) : false;
   const someSelected =
@@ -124,7 +178,7 @@ export default function BudgetTable({
                   </span>
                 </div>
                 <span className="text-base font-mono font-bold text-gray-900 dark:text-[#E4E6E7]">
-                  {item.budget}
+                  {fmt(parseBudget(item.budget))}
                 </span>
               </div>
               <p className="text-sm font-medium text-gray-900 dark:text-[#E4E6E7] mb-2">
@@ -143,7 +197,9 @@ export default function BudgetTable({
                 )}
                 <span>
                   <span>GL:</span>{" "}
-                  <span className="font-mono">{item.gl_code}</span>
+                  <span className="font-mono">
+                    <GlTooltip code={item.gl_code} name={glNames[item.gl_code]} />
+                  </span>
                 </span>
               </div>
               {showExpenses && (
@@ -222,7 +278,7 @@ export default function BudgetTable({
                 Activity
               </th>
               <th className="px-2 py-2.5 text-left text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase">
-                Prog
+                Activity No
               </th>
               <th className="px-2 py-2.5 text-left text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase">
                 Section
@@ -295,10 +351,10 @@ export default function BudgetTable({
                     {item.section}
                   </td>
                   <td className="px-2 py-2.5 text-xs text-gray-600 dark:text-[#9BA1A6] font-mono">
-                    {item.gl_code}
+                    <GlTooltip code={item.gl_code} name={glNames[item.gl_code]} />
                   </td>
                   <td className="px-2 py-2.5 text-sm text-gray-900 dark:text-[#E4E6E7] text-right font-mono font-medium">
-                    {item.budget}
+                    {fmt(parseBudget(item.budget))}
                   </td>
                   {showExpenses && (
                     <>

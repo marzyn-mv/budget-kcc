@@ -14,7 +14,7 @@
     "bcryptjs": "^3.0.3",
     "ioredis": "^6.0.0",
     "lucide-react": "^1.43.0",
-    "next": "16.2.9",
+    "next": "^16.4.0",
     "next-auth": "^4.24.14",
     "react": "19.2.4",
     "react-dom": "19.2.4",
@@ -30,7 +30,8 @@
     "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",
     "eslint": "^9",
-    "eslint-config-next": "16.2.9",
+    "eslint-config-next": "^14.2.35",
+    "react-grep": "^0.3.3",
     "tailwindcss": "^4",
     "tsx": "^4.22.4",
     "typescript": "^5"

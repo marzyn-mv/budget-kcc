@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import TopNav from "@/components/TopNav";
+import ReactGrep from "@/components/ReactGrep";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,6 +28,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} bg-gray-50 dark:bg-[#15171A] min-h-screen text-gray-900 dark:text-[#E4E6E7] transition-colors`}>
         <TopNav />
+        <ReactGrep />
         <main>{children}</main>
       </body>
     </html>

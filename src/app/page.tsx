@@ -144,8 +144,8 @@ export default function HomePage() {
               <p className="text-xs font-medium text-gray-500 dark:text-[#9BA1A6] mb-1">{f.fund}</p>
               <p className="text-sm font-bold text-gray-900 dark:text-[#E4E6E7]">
                 {new Intl.NumberFormat("en-US", {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
                 }).format(f.total)}
               </p>
               <p className="text-xs text-gray-500 dark:text-[#9BA1A6] mt-1">{f.count} items</p>
