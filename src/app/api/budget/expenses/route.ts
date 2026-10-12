@@ -49,9 +49,12 @@ export async function GET(req: NextRequest) {
       ),
     ]);
 
-    // PO total (all active POs)
+    // PO total (all active POs, excluding summary rows with empty po_full)
     const activePOs = poResult.rows.filter(
-      (r) => String((r as Record<string, unknown>).cancelled || "") !== "Yes"
+      (r) => {
+        const row = r as Record<string, unknown>;
+        return String(row.cancelled || "") !== "Yes" && String(row.po_full || "").trim() !== "";
+      }
     );
     const poTotal = activePOs.reduce(
       (sum, r) => sum + parseFloat(String(r.total) || "0"),

@@ -34,10 +34,10 @@ async function fetchSummary() {
         `,
         sql`
           SELECT
-            COALESCE((SELECT SUM(total) FROM po_reports WHERE cancelled != 'Yes'), 0) as po_total,
+            COALESCE((SELECT SUM(total) FROM po_reports WHERE cancelled != 'Yes' AND po_full IS NOT NULL AND po_full != ''), 0) as po_total,
             COALESCE((SELECT SUM(total) FROM voucher_reports WHERE cancelled != 'Yes'
               AND (po IS NULL OR po = '' OR po = '-'
-                OR po NOT IN (SELECT po_full FROM po_reports WHERE po_full IS NOT NULL AND cancelled != 'Yes'))
+                OR po NOT IN (SELECT po_full FROM po_reports WHERE po_full IS NOT NULL AND po_full != '' AND cancelled != 'Yes'))
             ), 0) as other_pv_total,
             COALESCE((SELECT SUM(total) FROM acr_reports WHERE cancelled != 'Yes'), 0) as total_acr
         `,
@@ -190,11 +190,11 @@ async function fetchList(
         const agClause = agPlaceholders.join(", ");
 
         const [poSpent, voucherSpent] = await Promise.all([
-          // PO total (all active POs)
+          // PO total (all active POs, excluding summary rows with empty po_full)
           query<{ gl_code: string; activity_detail: string; fund_code: string; total: string }>(
             `SELECT gl_code, activity_detail, fund_code, COALESCE(SUM(total), 0) as total
              FROM po_reports
-             WHERE cancelled != 'Yes'
+             WHERE cancelled != 'Yes' AND po_full IS NOT NULL AND po_full != ''
                AND (gl_code, activity_detail, fund_code) IN (${valuesClause})
              GROUP BY gl_code, activity_detail, fund_code`,
             valuesParams
@@ -205,7 +205,7 @@ async function fetchList(
              FROM voucher_reports
              WHERE cancelled != 'Yes'
                AND (po IS NULL OR po = '' OR po = '-'
-                 OR po NOT IN (SELECT po_full FROM po_reports WHERE po_full IS NOT NULL AND cancelled != 'Yes'))
+                 OR po NOT IN (SELECT po_full FROM po_reports WHERE po_full IS NOT NULL AND po_full != '' AND cancelled != 'Yes'))
                AND (gl_code, activity_detail, fund_code) IN (${valuesClause})
              GROUP BY gl_code, activity_detail, fund_code`,
             valuesParams

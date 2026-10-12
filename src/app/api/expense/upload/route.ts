@@ -31,13 +31,26 @@ export async function POST(req: NextRequest) {
     const rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
 
     // Normalize column names: trim whitespace from keys
-    const rows = rawRows.map((row) => {
+    const allRows = rawRows.map((row) => {
       const cleaned: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(row)) {
         cleaned[key.trim()] = value;
       }
       return cleaned;
     });
+
+    // Skip summary/total rows that have no identifier field
+    // Excel reports often have a grand total row at the bottom with only a Total column
+    const identifierField =
+      type === "po-report" ? "PoFull" :
+      type === "voucher-report" ? "VoucherFull" :
+      type === "acr-report" ? "VoucherFull" :
+      "Budget Control No";
+    const rows = allRows.filter((row) => {
+      const id = String(row[identifierField] || "").trim();
+      return id !== "";
+    });
+    const summaryRowsSkipped = allRows.length - rows.length;
 
     if (rows.length === 0) {
       return NextResponse.json({ error: "Empty file" }, { status: 400 });
@@ -260,10 +273,10 @@ export async function POST(req: NextRequest) {
     await invalidateCache("uploads:*");
 
     const msg = skippedCount > 0
-      ? `Uploaded ${file.name}: ${newRows.length} new rows, ${skippedCount} duplicates skipped`
-      : `Uploaded ${file.name}: ${newRows.length} rows`;
+      ? `Uploaded ${file.name}: ${newRows.length} new rows, ${skippedCount} duplicates skipped${summaryRowsSkipped ? `, ${summaryRowsSkipped} summary rows skipped` : ""}`
+      : `Uploaded ${file.name}: ${newRows.length} rows${summaryRowsSkipped ? `, ${summaryRowsSkipped} summary rows skipped` : ""}`;
     await addLog("info", `${type}_upload`, msg);
-    logger.info(`${type} uploaded`, { filename: file.name, imported: newRows.length, skipped: skippedCount });
+    logger.info(`${type} uploaded`, { filename: file.name, imported: newRows.length, skipped: skippedCount, summaryRowsSkipped });
 
     return NextResponse.json({
       message: skippedCount > 0
