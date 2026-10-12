@@ -143,7 +143,7 @@ export default function BudgetTable({
         )}
         {items.map((item, idx) => {
           const budget = parseBudget(item.budget) + (item.budget_control || 0);
-          const spent = (item.po_spent || 0) + (item.voucher_spent || 0) + (item.acr_spent || 0);
+          const spent = (item.po_spent || 0) + (item.voucher_spent || 0);
           const remaining = budget - spent;
 
           return (
@@ -309,7 +309,7 @@ export default function BudgetTable({
           <tbody className="bg-white dark:bg-[#1D1F20] divide-y divide-gray-200 dark:divide-[#3A3F44]">
             {items.map((item, idx) => {
               const budget = parseBudget(item.budget) + (item.budget_control || 0);
-              const spent = (item.po_spent || 0) + (item.voucher_spent || 0) + (item.acr_spent || 0);
+              const spent = (item.po_spent || 0) + (item.voucher_spent || 0);
               const remaining = budget - spent;
 
               return (

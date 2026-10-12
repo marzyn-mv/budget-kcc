@@ -125,25 +125,25 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
             )}
           </div>
           <div>
-            <p className="text-xs text-gray-500 dark:text-[#9BA1A6]">PO Spent</p>
+            <p className="text-xs text-gray-500 dark:text-[#9BA1A6]">PO</p>
             <p className="text-sm font-bold text-blue-600 dark:text-blue-400">
               {loading ? "..." : fmt(data?.poTotal ?? 0)}
             </p>
           </div>
           <div>
-            <p className="text-xs text-gray-500 dark:text-[#9BA1A6]">Voucher Spent</p>
+            <p className="text-xs text-gray-500 dark:text-[#9BA1A6]">Other PV</p>
             <p className="text-sm font-bold text-purple-600 dark:text-purple-400">
               {loading ? "..." : fmt(data?.voucherTotal ?? 0)}
             </p>
           </div>
           <div>
-            <p className="text-xs text-gray-500 dark:text-[#9BA1A6]">ACR Spent</p>
+            <p className="text-xs text-gray-500 dark:text-[#9BA1A6]">ACR</p>
             <p className="text-sm font-bold text-orange-600 dark:text-orange-400">
               {loading ? "..." : fmt(data?.acrTotal ?? 0)}
             </p>
           </div>
           <div>
-            <p className="text-xs text-gray-500 dark:text-[#9BA1A6]">Effective Budget</p>
+            <p className="text-xs text-gray-500 dark:text-[#9BA1A6]">Budget</p>
             <p className="text-sm font-bold text-gray-900 dark:text-[#E4E6E7]">
               {loading ? "..." : fmt(effectiveBudget)}
             </p>

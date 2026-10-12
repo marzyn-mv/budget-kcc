@@ -26,18 +26,25 @@ async function fetchSummary() {
   return getCached(
     "budget:summary",
     async () => {
-      const [totalResult, spentResult, byFundResult, byCenterResult] = await Promise.all([
+      const [totalResult, spentResult, bcResult, byFundResult, byCenterResult] = await Promise.all([
         sql`
           SELECT COUNT(*) as count,
             COALESCE(SUM(CAST(REPLACE(REPLACE(budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total
           FROM budget_items
         `,
         sql`
-          SELECT COALESCE(
-            COALESCE((SELECT SUM(total) FROM po_reports), 0) +
-            COALESCE((SELECT SUM(total) FROM voucher_reports), 0) +
-            COALESCE((SELECT SUM(total) FROM acr_reports), 0),
-          0) as total_spent
+          SELECT
+            COALESCE((SELECT SUM(total) FROM po_reports WHERE cancelled != 'Yes'), 0) as po_total,
+            COALESCE((SELECT SUM(total) FROM voucher_reports WHERE cancelled != 'Yes'
+              AND (po IS NULL OR po = '' OR po = '-'
+                OR po NOT IN (SELECT po_full FROM po_reports WHERE po_full IS NOT NULL AND cancelled != 'Yes'))
+            ), 0) as other_pv_total,
+            COALESCE((SELECT SUM(total) FROM acr_reports WHERE cancelled != 'Yes'), 0) as total_acr
+        `,
+        sql`
+          SELECT
+            COALESCE((SELECT SUM(amount) FROM budget_controls WHERE cr_activity != '' AND cr_gl_code != ''), 0) as total_credits,
+            COALESCE((SELECT SUM(amount) FROM budget_controls WHERE dr_activity != '' AND dr_gl_code != ''), 0) as total_debits
         `,
         sql`
           SELECT fund, COUNT(*) as count,
@@ -52,11 +59,16 @@ async function fetchSummary() {
       ]);
 
       const totalRow = totalResult.rows[0];
+      const approvedBudget = parseFloat(totalRow.total);
+      const bcNet = (parseFloat(bcResult.rows[0].total_credits) || 0) - (parseFloat(bcResult.rows[0].total_debits) || 0);
+      const poTotal = parseFloat(spentResult.rows[0].po_total) || 0;
+      const otherPvTotal = parseFloat(spentResult.rows[0].other_pv_total) || 0;
 
       return {
         totalItems: parseInt(totalRow.count),
-        totalBudget: parseFloat(totalRow.total),
-        totalSpent: parseFloat(spentResult.rows[0].total_spent) || 0,
+        totalBudget: approvedBudget + bcNet,
+        totalSpent: poTotal + otherPvTotal,
+        totalAcr: parseFloat(spentResult.rows[0].total_acr) || 0,
         byFund: byFundResult.rows.map((r) => ({
           ...r,
           count: parseInt(r.count),
@@ -151,7 +163,7 @@ async function fetchList(
         };
       });
 
-      const spentMap = new Map<string, { po: number; voucher: number; acr: number }>();
+      const spentMap = new Map<string, { po: number; voucher: number }>();
       const bcMap = new Map<string, number>();
 
       if (keys.length > 0) {
@@ -182,25 +194,24 @@ async function fetchList(
         });
         const agClause = agPlaceholders.join(", ");
 
-        const [poSpent, voucherSpent, acrSpent] = await Promise.all([
+        const [poSpent, voucherSpent] = await Promise.all([
+          // PO total (all active POs)
           query<{ gl_code: string; activity_detail: string; fund_code: string; total: string }>(
             `SELECT gl_code, activity_detail, fund_code, COALESCE(SUM(total), 0) as total
              FROM po_reports
-             WHERE (gl_code, activity_detail, fund_code) IN (${valuesClause})
+             WHERE cancelled != 'Yes'
+               AND (gl_code, activity_detail, fund_code) IN (${valuesClause})
              GROUP BY gl_code, activity_detail, fund_code`,
             valuesParams
           ),
+          // Other PV: vouchers that are NOT linked to an existing PO
           query<{ gl_code: string; activity_detail: string; fund_code: string; total: string }>(
             `SELECT gl_code, activity_detail, fund_code, COALESCE(SUM(total), 0) as total
              FROM voucher_reports
-             WHERE (gl_code, activity_detail, fund_code) IN (${valuesClause})
-             GROUP BY gl_code, activity_detail, fund_code`,
-            valuesParams
-          ),
-          query<{ gl_code: string; activity_detail: string; fund_code: string; total: string }>(
-            `SELECT gl_code, activity_detail, fund_code, COALESCE(SUM(total), 0) as total
-             FROM acr_reports
-             WHERE (gl_code, activity_detail, fund_code) IN (${valuesClause})
+             WHERE cancelled != 'Yes'
+               AND (po IS NULL OR po = '' OR po = '-'
+                 OR po NOT IN (SELECT po_full FROM po_reports WHERE po_full IS NOT NULL AND cancelled != 'Yes'))
+               AND (gl_code, activity_detail, fund_code) IN (${valuesClause})
              GROUP BY gl_code, activity_detail, fund_code`,
             valuesParams
           ),
@@ -208,20 +219,14 @@ async function fetchList(
 
         for (const r of poSpent.rows) {
           const key = `${r.gl_code}|${r.activity_detail}|${r.fund_code}`;
-          const entry = spentMap.get(key) || { po: 0, voucher: 0, acr: 0 };
+          const entry = spentMap.get(key) || { po: 0, voucher: 0 };
           entry.po = parseFloat(r.total);
           spentMap.set(key, entry);
         }
         for (const r of voucherSpent.rows) {
           const key = `${r.gl_code}|${r.activity_detail}|${r.fund_code}`;
-          const entry = spentMap.get(key) || { po: 0, voucher: 0, acr: 0 };
+          const entry = spentMap.get(key) || { po: 0, voucher: 0 };
           entry.voucher = parseFloat(r.total);
-          spentMap.set(key, entry);
-        }
-        for (const r of acrSpent.rows) {
-          const key = `${r.gl_code}|${r.activity_detail}|${r.fund_code}`;
-          const entry = spentMap.get(key) || { po: 0, voucher: 0, acr: 0 };
-          entry.acr = parseFloat(r.total);
           spentMap.set(key, entry);
         }
 
@@ -256,13 +261,13 @@ async function fetchList(
       const rows = itemsResult.rows.map((r) => {
         const row = r as Record<string, unknown>;
         const key = `${row.gl_code}|${row.activity_detail}|${row.fund}`;
-        const spent = spentMap.get(key) || { po: 0, voucher: 0, acr: 0 };
+        const spent = spentMap.get(key) || { po: 0, voucher: 0 };
         const bcKey = `${row.activity_detail}|${row.gl_code}`;
         return {
           ...r,
           po_spent: spent.po,
           voucher_spent: spent.voucher,
-          acr_spent: spent.acr,
+          acr_spent: 0,
           budget_control: bcMap.get(bcKey) || 0,
         };
       });

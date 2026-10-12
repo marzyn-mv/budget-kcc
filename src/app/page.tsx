@@ -12,6 +12,7 @@ interface SummaryData {
   totalItems: number;
   totalBudget: number;
   totalSpent: number;
+  totalAcr: number;
   byFund: { fund: string; total: number; count: number }[];
   byCenter: { center: string; total: number; count: number }[];
 }
@@ -111,13 +112,14 @@ export default function HomePage() {
           <SummaryCards
             totalBudget={summary.totalBudget}
             totalSpent={summary.totalSpent}
+            totalAcr={summary.totalAcr}
             totalItems={summary.totalItems}
             filteredBudget={data?.totalBudget}
             filteredItems={data?.total}
           />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[...Array(3)].map((_, i) => (
+            {[...Array(4)].map((_, i) => (
               <div key={i} className="bg-white dark:bg-[#1D1F20] rounded-xl border border-gray-200 dark:border-[#3A3F44] p-5 shadow-sm animate-pulse">
                 <div className="h-4 bg-gray-200 dark:bg-[#262A2E] rounded w-24 mb-2" />
                 <div className="h-7 bg-gray-200 dark:bg-[#262A2E] rounded w-36 mb-1" />

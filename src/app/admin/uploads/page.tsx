@@ -272,13 +272,13 @@ export default function UploadHistoryPage() {
               </div>
             )}
             <p className="text-sm text-gray-600 dark:text-[#9BA1A6] mb-4">
-              Type the filename below to confirm.
+              Type <strong>DELETE</strong> to confirm.
             </p>
             <input
               type="text"
               value={deleteInput}
               onChange={(e) => setDeleteInput(e.target.value)}
-              placeholder={deleteConfirm.filename}
+              placeholder="DELETE"
               className="w-full px-3 py-2 border border-gray-300 dark:border-[#3A3F44] dark:bg-[#15171A] dark:text-[#E4E6E7] rounded-lg text-sm mb-4 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
               autoFocus
             />
@@ -295,7 +295,7 @@ export default function UploadHistoryPage() {
               <button
                 onClick={handleDeleteConfirm}
                 disabled={
-                  deleteInput !== deleteConfirm.filename ||
+                  deleteInput !== "DELETE" ||
                   deleting === deleteConfirm.id
                 }
                 className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition"

@@ -28,7 +28,16 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
     const workbook = XLSX.read(buffer, { type: "buffer" });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
+    const rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
+
+    // Normalize column names: trim whitespace from keys
+    const rows = rawRows.map((row) => {
+      const cleaned: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(row)) {
+        cleaned[key.trim()] = value;
+      }
+      return cleaned;
+    });
 
     if (rows.length === 0) {
       return NextResponse.json({ error: "Empty file" }, { status: 400 });
@@ -45,6 +54,7 @@ export async function POST(req: NextRequest) {
     };
 
     // --- Duplicate detection per type ---
+    // Each report type checks its own unique key within its own table
     let existingKeys: Set<string>;
     let makeKey: (row: Record<string, unknown>) => string;
     let dbKeyQuery: string;

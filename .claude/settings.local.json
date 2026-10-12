@@ -14,7 +14,8 @@
       "Bash(npx tsc:*)",
       "Bash(python3:*)",
       "WebSearch",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "mcp__ide__getDiagnostics"
     ]
   }
 }

@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
         [gl_code, activity, fund]
       ),
       query(
-        `SELECT id, produce_date, voucher_full, supplier, voucher_type, total, reason, cancelled, cheque_no
+        `SELECT id, produce_date, voucher_full, supplier, voucher_type, total, reason, cancelled, cheque_no, po
          FROM voucher_reports
          WHERE gl_code = $1 AND activity_detail = $2 AND fund_code = $3
          ORDER BY produce_date DESC`,
@@ -49,18 +49,38 @@ export async function GET(req: NextRequest) {
       ),
     ]);
 
-    const poTotal = poResult.rows.reduce(
+    // PO total (all active POs)
+    const activePOs = poResult.rows.filter(
+      (r) => String((r as Record<string, unknown>).cancelled || "") !== "Yes"
+    );
+    const poTotal = activePOs.reduce(
       (sum, r) => sum + parseFloat(String(r.total) || "0"),
       0
     );
-    const voucherTotal = voucherResult.rows.reduce(
-      (sum, r) => sum + parseFloat(String(r.total) || "0"),
+    const poNumbers = new Set(
+      activePOs
+        .map((r) => String((r as Record<string, unknown>).po_full || ""))
+        .filter(Boolean)
+    );
+
+    // Other PV: active vouchers NOT linked to an existing PO
+    const activeVouchers = voucherResult.rows.filter(
+      (r) => String((r as Record<string, unknown>).cancelled || "") !== "Yes"
+    );
+    const voucherTotal = activeVouchers.reduce(
+      (sum, r) => {
+        const vpo = String((r as Record<string, unknown>).po || "");
+        if (vpo && vpo !== "-" && poNumbers.has(vpo)) return sum;
+        return sum + parseFloat(String(r.total) || "0");
+      },
       0
     );
-    const acrTotal = acrResult.rows.reduce(
-      (sum, r) => sum + parseFloat(String(r.total) || "0"),
-      0
-    );
+    const acrTotal = acrResult.rows
+      .filter((r) => String((r as Record<string, unknown>).cancelled || "") !== "Yes")
+      .reduce(
+        (sum, r) => sum + parseFloat(String(r.total) || "0"),
+        0
+      );
 
     const bcItems = bcResult.rows.map((r) => {
       const row = r as Record<string, unknown>;
@@ -81,7 +101,7 @@ export async function GET(req: NextRequest) {
       voucherTotal,
       acrTotal,
       bcNet,
-      totalExpense: poTotal + voucherTotal + acrTotal,
+      totalExpense: poTotal + voucherTotal,
       poItems: poResult.rows,
       voucherItems: voucherResult.rows,
       acrItems: acrResult.rows,
