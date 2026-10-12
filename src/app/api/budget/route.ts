@@ -26,7 +26,7 @@ async function fetchSummary() {
   return getCached(
     "budget:summary",
     async () => {
-      const [totalResult, spentResult, bcResult, byFundResult, byCenterResult] = await Promise.all([
+      const [totalResult, spentResult, byFundResult, byCenterResult] = await Promise.all([
         sql`
           SELECT COUNT(*) as count,
             COALESCE(SUM(CAST(REPLACE(REPLACE(budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total
@@ -42,11 +42,6 @@ async function fetchSummary() {
             COALESCE((SELECT SUM(total) FROM acr_reports WHERE cancelled != 'Yes'), 0) as total_acr
         `,
         sql`
-          SELECT
-            COALESCE((SELECT SUM(amount) FROM budget_controls WHERE cr_activity != '' AND cr_gl_code != ''), 0) as total_credits,
-            COALESCE((SELECT SUM(amount) FROM budget_controls WHERE dr_activity != '' AND dr_gl_code != ''), 0) as total_debits
-        `,
-        sql`
           SELECT fund, COUNT(*) as count,
             COALESCE(SUM(CAST(REPLACE(REPLACE(budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total
           FROM budget_items GROUP BY fund ORDER BY total DESC
@@ -59,14 +54,14 @@ async function fetchSummary() {
       ]);
 
       const totalRow = totalResult.rows[0];
+      // Budget controls are zero-sum transfers between items — no effect on global total
       const approvedBudget = parseFloat(totalRow.total);
-      const bcNet = (parseFloat(bcResult.rows[0].total_credits) || 0) - (parseFloat(bcResult.rows[0].total_debits) || 0);
       const poTotal = parseFloat(spentResult.rows[0].po_total) || 0;
       const otherPvTotal = parseFloat(spentResult.rows[0].other_pv_total) || 0;
 
       return {
         totalItems: parseInt(totalRow.count),
-        totalBudget: approvedBudget + bcNet,
+        totalBudget: approvedBudget,
         totalSpent: poTotal + otherPvTotal,
         totalAcr: parseFloat(spentResult.rows[0].total_acr) || 0,
         byFund: byFundResult.rows.map((r) => ({

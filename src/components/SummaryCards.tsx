@@ -36,7 +36,7 @@ export default function SummaryCards({
         <p className="text-2xl font-bold text-gray-900 dark:text-[#E4E6E7]">
           {formatMVR(totalBudget)}
         </p>
-        <p className="text-xs text-gray-500 dark:text-[#9BA1A6] mt-1">Approved +/- Budget Control</p>
+        <p className="text-xs text-gray-500 dark:text-[#9BA1A6] mt-1">Approved Budget</p>
       </div>
       <div className="bg-white dark:bg-[#1D1F20] rounded-xl border border-gray-200 dark:border-[#3A3F44] p-5 shadow-sm">
         <p className="text-sm text-gray-500 dark:text-[#9BA1A6] mb-1">Spent</p>
