@@ -95,6 +95,15 @@ async function ensureTables() {
 
     await sql`ALTER TABLE gl_codes ADD COLUMN IF NOT EXISTS section_id INTEGER`;
 
+    await sql`CREATE TABLE IF NOT EXISTS activities (
+      id SERIAL PRIMARY KEY, activity_detail TEXT NOT NULL,
+      activity_number TEXT NOT NULL DEFAULT '', section TEXT NOT NULL DEFAULT '',
+      fund TEXT NOT NULL DEFAULT '', upload_id INTEGER,
+      created_at TIMESTAMP DEFAULT NOW(), updated_at TIMESTAMP DEFAULT NOW())`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_activities_detail ON activities(activity_detail)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_activities_section ON activities(section)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_activities_fund ON activities(fund)`;
+
     initialized = true;
   })();
 

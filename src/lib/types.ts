@@ -129,6 +129,17 @@ export interface BudgetControl {
   created_at: string;
 }
 
+export interface Activity {
+  id: number;
+  activity_detail: string;
+  activity_number: string;
+  section: string;
+  fund: string;
+  upload_id: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface BudgetFilters {
   search?: string;
   fund?: string;

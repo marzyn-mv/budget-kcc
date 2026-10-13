@@ -16,6 +16,7 @@ import {
   ChevronRight,
   BookOpen,
   Layers,
+  ListChecks,
 } from "lucide-react";
 
 interface NavItem {
@@ -50,6 +51,7 @@ const navGroups: NavGroup[] = [
     heading: "Data",
     items: [
       { href: "/admin/gl-codes", label: "Budget GL Codes", icon: BookOpen },
+      { href: "/admin/activities", label: "Activity Details", icon: ListChecks },
       { href: "/admin/upload", label: "Upload Budget", icon: Upload },
       { href: "/admin/uploads", label: "Upload History", icon: FolderOpen },
     ],
