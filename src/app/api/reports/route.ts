@@ -3,6 +3,38 @@ import { sql } from "@/lib/db";
 import { getCached } from "@/lib/cache";
 import logger from "@/lib/logger";
 
+/** GL code classification by first 3 digits — from GL_Code_Classification_Reference */
+const GL_CLASSIFICATIONS: Record<string, string> = {
+  "211": "Salaries and Overtime",
+  "212": "Employee Allowances and Other Payments",
+  "213": "Pensions and Retirement Benefits",
+  "221": "Travel Expenses",
+  "222": "Office Supplies and Consumables",
+  "223": "Operating Services and Utilities",
+  "224": "Operational Supplies and Consumables",
+  "225": "Training and Human Resource Development",
+  "226": "Repairs and Maintenance",
+  "227": "Interest and Debt Service Charges",
+  "228": "Subsidies, Grants and Financial Assistance",
+  "281": "Losses and Compensation",
+  "291": "Economic Development Projects and Activities",
+  "292": "Budget Contingency",
+  "295": "Transfers to the Sovereign Development Fund",
+  "421": "Land and Buildings",
+  "422": "Infrastructure Development",
+  "423": "Furniture, Equipment, Software and Other Assets",
+  "424": "Vehicles and Transport Assets",
+  "441": "Domestic Equity Investments and Capital Contributions",
+  "442": "Overseas Equity Investments",
+  "451": "Building Alterations and Improvements",
+  "721": "Short-Term Domestic Loan Repayments",
+  "722": "Short-Term Foreign Loan Repayments",
+  "723": "Long-Term Domestic Loan Repayments",
+  "725": "Long-Term Foreign Loan Repayments",
+  "731": "Domestic Loans Granted",
+  "732": "Foreign Loans Granted",
+};
+
 async function fetchReportData() {
   return getCached(
     "reports:all",
@@ -47,13 +79,13 @@ async function fetchReportData() {
           SELECT center_name as center, COALESCE(SUM(CAST(REPLACE(REPLACE(budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total
           FROM budget_items GROUP BY center_name ORDER BY total DESC LIMIT 10
         `,
-        // Top 10 GL codes
+        // Budget by GL classification (first 3 digits)
         sql`
-          SELECT b.gl_code, COALESCE(g.name_en, b.gl_code) as gl_name,
-            COALESCE(SUM(CAST(REPLACE(REPLACE(b.budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total
-          FROM budget_items b
-          LEFT JOIN gl_codes g ON g.gl_code = b.gl_code
-          GROUP BY b.gl_code, g.name_en ORDER BY total DESC LIMIT 10
+          SELECT LEFT(gl_code, 3) as gl_class,
+            COALESCE(SUM(CAST(REPLACE(REPLACE(budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total
+          FROM budget_items
+          WHERE gl_code != ''
+          GROUP BY LEFT(gl_code, 3) ORDER BY total DESC
         `,
         // PO spent by fund
         sql`
@@ -102,9 +134,9 @@ async function fetchReportData() {
           center: r.center,
           budget: parseFloat(r.total),
         })),
-        byGl: byGlResult.rows.map((r) => ({
-          code: r.gl_code,
-          description: r.gl_name,
+        byClassification: byGlResult.rows.map((r) => ({
+          code: r.gl_class,
+          name: GL_CLASSIFICATIONS[r.gl_class] || `Unknown (${r.gl_class})`,
           budget: parseFloat(r.total),
         })),
         spentByFund: byFund.map((f) => {

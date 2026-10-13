@@ -27,7 +27,7 @@ interface ReportData {
   byFund: { fund: string; budget: number }[];
   bySection: { section: string; budget: number }[];
   byCenter: { center: string; budget: number }[];
-  byGl: { code: string; description: string; budget: number }[];
+  byClassification: { code: string; name: string; budget: number }[];
   spentByFund: { fund: string; poSpent: number; pvSpent: number }[];
 }
 
@@ -392,26 +392,25 @@ export default function ReportsPage() {
           </ResponsiveContainer>
         </ChartCard>
 
-        {/* Top 10 Centers - Bar */}
-        <ChartCard title="Top 10 Budget Items by Center">
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={data.byCenter}>
+        {/* Budget by GL Classification - Horizontal Bar */}
+        <ChartCard title="Budget by GL Classification">
+          <ResponsiveContainer width="100%" height={Math.max(300, data.byClassification.length * 32)}>
+            <BarChart data={data.byClassification} layout="vertical">
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke="#3A3F44"
                 opacity={0.3}
               />
-              <XAxis
-                dataKey="center"
+              <XAxis type="number" tick={axisStyle} tickFormatter={formatCompact} />
+              <YAxis
+                type="category"
+                dataKey="name"
                 tick={axisStyle}
-                angle={-35}
-                textAnchor="end"
-                height={70}
+                width={200}
               />
-              <YAxis tick={axisStyle} tickFormatter={formatCompact} />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="budget" name="Budget" fill={COLORS[2]} radius={[4, 4, 0, 0]}>
-                {data.byCenter.map((_, i) => (
+              <Bar dataKey="budget" name="Budget" radius={[0, 4, 4, 0]}>
+                {data.byClassification.map((_, i) => (
                   <Cell key={i} fill={COLORS[i % COLORS.length]} />
                 ))}
               </Bar>
