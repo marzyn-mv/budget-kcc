@@ -19,7 +19,7 @@ export default function AdminPage() {
   const [search, setSearch] = useState("");
   const [fund, setFund] = useState("");
   const [center, setCenter] = useState("");
-  const [section, setSection] = useState("");
+  const [section, setSection] = useState<string[]>([]);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(25);
   const [editItem, setEditItem] = useState<BudgetItem | null>(null);
@@ -30,7 +30,7 @@ export default function AdminPage() {
     if (search) params.set("search", search);
     if (fund) params.set("fund", fund);
     if (center) params.set("center", center);
-    if (section) params.set("section", section);
+    if (section.length > 0) params.set("section", section.join(","));
     params.set("page", String(page));
     params.set("limit", String(limit));
 
@@ -70,7 +70,7 @@ export default function AdminPage() {
           search={search}
           fund={fund}
           center={center}
-          section={section}
+          selectedSections={section}
           funds={data?.filters.funds || []}
           centers={data?.filters.centers || []}
           sections={data?.filters.sections || []}
@@ -86,7 +86,7 @@ export default function AdminPage() {
             setCenter(v);
             setPage(1);
           }}
-          onSectionChange={(v) => {
+          onSectionChange={(v: string[]) => {
             setSection(v);
             setPage(1);
           }}

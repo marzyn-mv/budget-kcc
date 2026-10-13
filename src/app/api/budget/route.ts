@@ -84,12 +84,12 @@ async function fetchList(
   search: string,
   fund: string,
   center: string,
-  section: string,
+  sections: string[],
   page: number,
   limit: number,
   offset: number
 ) {
-  const cacheKey = `budget:list:${search}|${fund}|${center}|${section}|${page}|${limit}`;
+  const cacheKey = `budget:list:${search}|${fund}|${center}|${sections.join(",")}|${page}|${limit}`;
 
   return getCached(
     cacheKey,
@@ -115,10 +115,11 @@ async function fetchList(
         params.push(center);
         paramIndex++;
       }
-      if (section) {
-        conditions.push(`section = $${paramIndex}`);
-        params.push(section);
-        paramIndex++;
+      if (sections.length > 0) {
+        const placeholders = sections.map((_, i) => `$${paramIndex + i}`).join(", ");
+        conditions.push(`section IN (${placeholders})`);
+        params.push(...sections);
+        paramIndex += sections.length;
       }
 
       const where = conditions.length
@@ -288,7 +289,8 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get("search") || "";
     const fund = searchParams.get("fund") || "";
     const center = searchParams.get("center") || "";
-    const section = searchParams.get("section") || "";
+    const sectionParam = searchParams.get("section") || "";
+    const sections = sectionParam ? sectionParam.split(",").filter(Boolean) : [];
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "50");
     const offset = (page - 1) * limit;
@@ -297,10 +299,10 @@ export async function GET(req: NextRequest) {
     const [filters, summary, list] = await Promise.all([
       fetchFilters(),
       fetchSummary(),
-      fetchList(search, fund, center, section, page, limit, offset),
+      fetchList(search, fund, center, sections, page, limit, offset),
     ]);
 
-    logger.info("Budget data fetched", { search, fund, center, section, page });
+    logger.info("Budget data fetched", { search, fund, center, sections, page });
 
     return NextResponse.json({
       ...list,

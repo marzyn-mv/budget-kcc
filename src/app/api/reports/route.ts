@@ -1,0 +1,136 @@
+import { NextResponse } from "next/server";
+import { sql } from "@/lib/db";
+import { getCached } from "@/lib/cache";
+import logger from "@/lib/logger";
+
+async function fetchReportData() {
+  return getCached(
+    "reports:all",
+    async () => {
+      const [
+        totalResult,
+        spentResult,
+        byFundResult,
+        bySectionResult,
+        byCenterResult,
+        byGlResult,
+        poByFundResult,
+        pvByFundResult,
+      ] = await Promise.all([
+        // Total budget
+        sql`
+          SELECT COALESCE(SUM(CAST(REPLACE(REPLACE(budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total
+          FROM budget_items
+        `,
+        // Spending totals (PO + other PV + ACR)
+        sql`
+          SELECT
+            COALESCE((SELECT SUM(total) FROM po_reports WHERE cancelled != 'Yes' AND po_full IS NOT NULL AND po_full != ''), 0) as po_total,
+            COALESCE((SELECT SUM(total) FROM voucher_reports WHERE cancelled != 'Yes'
+              AND (po IS NULL OR po = '' OR po = '-'
+                OR po NOT IN (SELECT po_full FROM po_reports WHERE po_full IS NOT NULL AND po_full != '' AND cancelled != 'Yes'))
+            ), 0) as other_pv_total,
+            COALESCE((SELECT SUM(total) FROM acr_reports WHERE cancelled != 'Yes'), 0) as total_acr
+        `,
+        // By Fund
+        sql`
+          SELECT fund, COALESCE(SUM(CAST(REPLACE(REPLACE(budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total
+          FROM budget_items GROUP BY fund ORDER BY total DESC
+        `,
+        // By Section
+        sql`
+          SELECT section, COALESCE(SUM(CAST(REPLACE(REPLACE(budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total
+          FROM budget_items WHERE section != '' GROUP BY section ORDER BY total DESC
+        `,
+        // By Center (top 10)
+        sql`
+          SELECT center_name as center, COALESCE(SUM(CAST(REPLACE(REPLACE(budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total
+          FROM budget_items GROUP BY center_name ORDER BY total DESC LIMIT 10
+        `,
+        // Top 10 GL codes
+        sql`
+          SELECT b.gl_code, COALESCE(g.name_en, b.gl_code) as gl_name,
+            COALESCE(SUM(CAST(REPLACE(REPLACE(b.budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total
+          FROM budget_items b
+          LEFT JOIN gl_codes g ON g.gl_code = b.gl_code
+          GROUP BY b.gl_code, g.name_en ORDER BY total DESC LIMIT 10
+        `,
+        // PO spent by fund
+        sql`
+          SELECT fund_code as fund, COALESCE(SUM(total), 0) as total
+          FROM po_reports
+          WHERE cancelled != 'Yes' AND po_full IS NOT NULL AND po_full != ''
+          GROUP BY fund_code ORDER BY fund_code
+        `,
+        // Other PV spent by fund
+        sql`
+          SELECT fund_code as fund, COALESCE(SUM(total), 0) as total
+          FROM voucher_reports
+          WHERE cancelled != 'Yes'
+            AND (po IS NULL OR po = '' OR po = '-'
+              OR po NOT IN (SELECT po_full FROM po_reports WHERE po_full IS NOT NULL AND po_full != '' AND cancelled != 'Yes'))
+          GROUP BY fund_code ORDER BY fund_code
+        `,
+      ]);
+
+      const totalBudget = parseFloat(totalResult.rows[0].total);
+      const poTotal = parseFloat(spentResult.rows[0].po_total) || 0;
+      const otherPvTotal = parseFloat(spentResult.rows[0].other_pv_total) || 0;
+      const totalAcr = parseFloat(spentResult.rows[0].total_acr) || 0;
+      const totalSpent = poTotal + otherPvTotal;
+
+      const byFund = byFundResult.rows.map((r) => ({
+        fund: r.fund,
+        budget: parseFloat(r.total),
+      }));
+
+      return {
+        summary: {
+          totalBudget,
+          totalSpent,
+          totalRemaining: totalBudget - totalSpent,
+          totalAcr,
+          poTotal,
+          otherPvTotal,
+        },
+        byFund,
+        bySection: bySectionResult.rows.map((r) => ({
+          section: r.section,
+          budget: parseFloat(r.total),
+        })),
+        byCenter: byCenterResult.rows.map((r) => ({
+          center: r.center,
+          budget: parseFloat(r.total),
+        })),
+        byGl: byGlResult.rows.map((r) => ({
+          code: r.gl_code,
+          description: r.gl_name,
+          budget: parseFloat(r.total),
+        })),
+        spentByFund: byFund.map((f) => {
+          const po = poByFundResult.rows.find((r) => r.fund === f.fund);
+          const pv = pvByFundResult.rows.find((r) => r.fund === f.fund);
+          return {
+            fund: f.fund,
+            poSpent: po ? parseFloat(po.total) || 0 : 0,
+            pvSpent: pv ? parseFloat(pv.total) || 0 : 0,
+          };
+        }),
+      };
+    },
+    300
+  );
+}
+
+export async function GET() {
+  try {
+    const data = await fetchReportData();
+    return NextResponse.json(data);
+  } catch (error) {
+    logger.error("Failed to fetch report data", { error });
+    return NextResponse.json(
+      { error: "Failed to fetch report data" },
+      { status: 500 }
+    );
+  }
+}

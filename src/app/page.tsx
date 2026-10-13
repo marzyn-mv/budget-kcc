@@ -37,7 +37,7 @@ export default function HomePage() {
   const [search, setSearch] = useState("");
   const [fund, setFund] = useState("");
   const [center, setCenter] = useState("");
-  const [section, setSection] = useState("");
+  const [section, setSection] = useState<string[]>([]);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(25);
   const [loading, setLoading] = useState(true);
@@ -49,7 +49,7 @@ export default function HomePage() {
     if (search) params.set("search", search);
     if (fund) params.set("fund", fund);
     if (center) params.set("center", center);
-    if (section) params.set("section", section);
+    if (section.length > 0) params.set("section", section.join(","));
     params.set("page", String(page));
     params.set("limit", String(limit));
 
@@ -86,7 +86,7 @@ export default function HomePage() {
     setPage(1);
   };
 
-  const handleSectionChange = (val: string) => {
+  const handleSectionChange = (val: string[]) => {
     setSection(val);
     setPage(1);
   };
@@ -169,7 +169,7 @@ export default function HomePage() {
           search={search}
           fund={fund}
           center={center}
-          section={section}
+          selectedSections={section}
           funds={data?.filters.funds || []}
           centers={data?.filters.centers || []}
           sections={data?.filters.sections || []}
