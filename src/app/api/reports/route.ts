@@ -58,9 +58,10 @@ async function fetchReportData() {
         sql`
           SELECT
             COALESCE((SELECT SUM(total) FROM po_reports WHERE cancelled != 'Yes' AND po_full IS NOT NULL AND po_full != ''), 0) as po_total,
-            COALESCE((SELECT SUM(total) FROM voucher_reports WHERE cancelled != 'Yes'
-              AND (po IS NULL OR po = '' OR po = '-'
-                OR po NOT IN (SELECT po_full FROM po_reports WHERE po_full IS NOT NULL AND po_full != '' AND cancelled != 'Yes'))
+            COALESCE((SELECT SUM(total) FROM voucher_reports vr WHERE vr.cancelled != 'Yes'
+              AND (vr.po IS NULL OR vr.po = '' OR vr.po = '-'
+                OR vr.po NOT IN (SELECT po_full FROM po_reports pr WHERE pr.po_full IS NOT NULL AND pr.po_full != '' AND pr.cancelled != 'Yes'
+                  AND pr.gl_code = vr.gl_code AND pr.activity_detail = vr.activity_detail AND pr.fund_code = vr.fund_code))
             ), 0) as other_pv_total,
             COALESCE((SELECT SUM(total) FROM acr_reports WHERE cancelled != 'Yes'), 0) as total_acr
         `,
@@ -97,10 +98,11 @@ async function fetchReportData() {
         // Other PV spent by fund
         sql`
           SELECT fund_code as fund, COALESCE(SUM(total), 0) as total
-          FROM voucher_reports
-          WHERE cancelled != 'Yes'
-            AND (po IS NULL OR po = '' OR po = '-'
-              OR po NOT IN (SELECT po_full FROM po_reports WHERE po_full IS NOT NULL AND po_full != '' AND cancelled != 'Yes'))
+          FROM voucher_reports vr
+          WHERE vr.cancelled != 'Yes'
+            AND (vr.po IS NULL OR vr.po = '' OR vr.po = '-'
+              OR vr.po NOT IN (SELECT po_full FROM po_reports pr WHERE pr.po_full IS NOT NULL AND pr.po_full != '' AND pr.cancelled != 'Yes'
+                AND pr.gl_code = vr.gl_code AND pr.activity_detail = vr.activity_detail AND pr.fund_code = vr.fund_code))
           GROUP BY fund_code ORDER BY fund_code
         `,
       ]);

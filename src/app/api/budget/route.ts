@@ -35,9 +35,10 @@ async function fetchSummary() {
         sql`
           SELECT
             COALESCE((SELECT SUM(total) FROM po_reports WHERE cancelled != 'Yes' AND po_full IS NOT NULL AND po_full != ''), 0) as po_total,
-            COALESCE((SELECT SUM(total) FROM voucher_reports WHERE cancelled != 'Yes'
-              AND (po IS NULL OR po = '' OR po = '-'
-                OR po NOT IN (SELECT po_full FROM po_reports WHERE po_full IS NOT NULL AND po_full != '' AND cancelled != 'Yes'))
+            COALESCE((SELECT SUM(total) FROM voucher_reports vr WHERE vr.cancelled != 'Yes'
+              AND (vr.po IS NULL OR vr.po = '' OR vr.po = '-'
+                OR vr.po NOT IN (SELECT po_full FROM po_reports pr WHERE pr.po_full IS NOT NULL AND pr.po_full != '' AND pr.cancelled != 'Yes'
+                  AND pr.gl_code = vr.gl_code AND pr.activity_detail = vr.activity_detail AND pr.fund_code = vr.fund_code))
             ), 0) as other_pv_total,
             COALESCE((SELECT SUM(total) FROM acr_reports WHERE cancelled != 'Yes'), 0) as total_acr
         `,
@@ -54,7 +55,6 @@ async function fetchSummary() {
       ]);
 
       const totalRow = totalResult.rows[0];
-      // Budget controls are zero-sum transfers between items — no effect on global total
       const approvedBudget = parseFloat(totalRow.total);
       const poTotal = parseFloat(spentResult.rows[0].po_total) || 0;
       const otherPvTotal = parseFloat(spentResult.rows[0].other_pv_total) || 0;
@@ -62,6 +62,7 @@ async function fetchSummary() {
       return {
         totalItems: parseInt(totalRow.count),
         totalBudget: approvedBudget,
+        totalBcNet: 0, // Budget controls are zero-sum globally
         totalSpent: poTotal + otherPvTotal,
         totalAcr: parseFloat(spentResult.rows[0].total_acr) || 0,
         byFund: byFundResult.rows.map((r) => ({
@@ -203,11 +204,12 @@ async function fetchList(
           // Other PV: vouchers that are NOT linked to an existing PO
           query<{ gl_code: string; activity_detail: string; fund_code: string; total: string }>(
             `SELECT gl_code, activity_detail, fund_code, COALESCE(SUM(total), 0) as total
-             FROM voucher_reports
-             WHERE cancelled != 'Yes'
-               AND (po IS NULL OR po = '' OR po = '-'
-                 OR po NOT IN (SELECT po_full FROM po_reports WHERE po_full IS NOT NULL AND po_full != '' AND cancelled != 'Yes'))
-               AND (gl_code, activity_detail, fund_code) IN (${valuesClause})
+             FROM voucher_reports vr
+             WHERE vr.cancelled != 'Yes'
+               AND (vr.po IS NULL OR vr.po = '' OR vr.po = '-'
+                 OR vr.po NOT IN (SELECT po_full FROM po_reports pr WHERE pr.po_full IS NOT NULL AND pr.po_full != '' AND pr.cancelled != 'Yes'
+                   AND pr.gl_code = vr.gl_code AND pr.activity_detail = vr.activity_detail AND pr.fund_code = vr.fund_code))
+               AND (vr.gl_code, vr.activity_detail, vr.fund_code) IN (${valuesClause})
              GROUP BY gl_code, activity_detail, fund_code`,
             valuesParams
           ),
@@ -254,6 +256,23 @@ async function fetchList(
         }
       }
 
+      // Compute filtered BC net across ALL filtered items (not just current page)
+      const [bcCreditResult, bcDebitResult] = await Promise.all([
+        query<{ total: string }>(
+          `SELECT COALESCE(SUM(amount), 0) as total FROM budget_controls
+           WHERE (cr_activity, cr_gl_code) IN (SELECT DISTINCT activity_detail, gl_code FROM budget_items ${where})`,
+          params
+        ),
+        query<{ total: string }>(
+          `SELECT COALESCE(SUM(amount), 0) as total FROM budget_controls
+           WHERE (dr_activity, dr_gl_code) IN (SELECT DISTINCT activity_detail, gl_code FROM budget_items ${where})`,
+          params
+        ),
+      ]);
+      const filteredBcNet =
+        (parseFloat(bcCreditResult.rows[0].total) || 0) -
+        (parseFloat(bcDebitResult.rows[0].total) || 0);
+
       const rows = itemsResult.rows.map((r) => {
         const row = r as Record<string, unknown>;
         const key = `${row.gl_code}|${row.activity_detail}|${row.fund}`;
@@ -269,11 +288,12 @@ async function fetchList(
       });
 
       const effectiveLimit = showAll ? count : limit;
+      const approvedBudget = parseFloat(sumResult.rows[0].total);
 
       return {
         items: rows,
         total: count,
-        totalBudget: parseFloat(sumResult.rows[0].total),
+        totalBudget: approvedBudget + filteredBcNet,
         page: showAll ? 1 : page,
         limit: effectiveLimit,
         totalPages: showAll ? 1 : Math.ceil(count / limit),

@@ -11,6 +11,7 @@ import { BudgetItem } from "@/lib/types";
 interface SummaryData {
   totalItems: number;
   totalBudget: number;
+  totalBcNet: number;
   totalSpent: number;
   totalAcr: number;
   byFund: { fund: string; total: number; count: number }[];
@@ -111,11 +112,13 @@ export default function HomePage() {
         {summary ? (
           <SummaryCards
             totalBudget={summary.totalBudget}
+            totalBcNet={summary.totalBcNet}
             totalSpent={summary.totalSpent}
             totalAcr={summary.totalAcr}
             totalItems={summary.totalItems}
             filteredBudget={data?.totalBudget}
             filteredItems={data?.total}
+            isFiltered={!!(search || fund || center || section.length > 0)}
           />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

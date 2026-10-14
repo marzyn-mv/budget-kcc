@@ -5,8 +5,10 @@ interface Props {
   totalSpent: number;
   totalAcr: number;
   totalItems: number;
+  totalBcNet?: number;
   filteredBudget?: number;
   filteredItems?: number;
+  isFiltered?: boolean;
 }
 
 function formatMVR(amount: number): string {
@@ -21,22 +23,30 @@ export default function SummaryCards({
   totalSpent,
   totalAcr,
   totalItems,
+  totalBcNet = 0,
   filteredBudget,
   filteredItems,
+  isFiltered = false,
 }: Props) {
+  const effectiveBudget = totalBudget + totalBcNet;
   const spent = totalSpent || 0;
-  const totalRemaining = totalBudget - spent;
-  const showFiltered =
-    filteredBudget !== undefined && filteredBudget !== totalBudget;
+  const totalRemaining = effectiveBudget - spent;
+  const showFiltered = isFiltered && filteredBudget !== undefined;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <div className="bg-white dark:bg-[#1D1F20] rounded-xl border border-gray-200 dark:border-[#3A3F44] p-5 shadow-sm">
         <p className="text-sm text-gray-500 dark:text-[#9BA1A6] mb-1">Budget</p>
         <p className="text-2xl font-bold text-gray-900 dark:text-[#E4E6E7]">
-          {formatMVR(totalBudget)}
+          {formatMVR(effectiveBudget)}
         </p>
-        <p className="text-xs text-gray-500 dark:text-[#9BA1A6] mt-1">Approved Budget</p>
+        {totalBcNet !== 0 ? (
+          <p className={`text-xs mt-1 ${totalBcNet > 0 ? "text-teal-600 dark:text-teal-400" : "text-red-500 dark:text-red-400"}`}>
+            Approved {formatMVR(totalBudget)} | BC: {totalBcNet > 0 ? "+" : ""}{formatMVR(totalBcNet)}
+          </p>
+        ) : (
+          <p className="text-xs text-gray-500 dark:text-[#9BA1A6] mt-1">Approved Budget</p>
+        )}
       </div>
       <div className="bg-white dark:bg-[#1D1F20] rounded-xl border border-gray-200 dark:border-[#3A3F44] p-5 shadow-sm">
         <p className="text-sm text-gray-500 dark:text-[#9BA1A6] mb-1">Spent</p>
@@ -51,7 +61,7 @@ export default function SummaryCards({
           {formatMVR(totalRemaining)}
         </p>
         <p className={`text-xs mt-1 ${totalRemaining >= 0 ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}`}>
-          Budget - Spent
+          {totalBcNet !== 0 ? "(Budget + BC) - Spent" : "Budget - Spent"}
         </p>
       </div>
       <div className="bg-orange-50 dark:bg-orange-900/15 rounded-xl border border-orange-200 dark:border-orange-800/50 p-5 shadow-sm">
