@@ -73,15 +73,6 @@ export default function SummaryCards({
         </p>
         <p className="text-xs text-orange-700 dark:text-orange-400 mt-1">ACR total</p>
       </div>
-      {showFiltered && (
-        <div className="bg-blue-50 dark:bg-blue-900/15 rounded-xl border border-blue-200 dark:border-blue-800/50 p-5 shadow-sm">
-          <p className="text-sm text-blue-600 dark:text-blue-400 mb-1">Filtered Budget</p>
-          <p className="text-2xl font-bold text-blue-900 dark:text-blue-300">
-            {formatMVR(filteredBudget!)}
-          </p>
-          <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">{filteredItems} items</p>
-        </div>
-      )}
     </div>
   );
 }

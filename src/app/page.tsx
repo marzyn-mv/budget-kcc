@@ -22,6 +22,8 @@ interface BudgetResponse {
   items: BudgetItem[];
   total: number;
   totalBudget: number;
+  filteredSpent: number;
+  filteredAcr: number;
   page: number;
   limit: number;
   totalPages: number;
@@ -93,6 +95,14 @@ export default function HomePage() {
   };
 
   const summary = data?.summary;
+  const isFiltered = !!(search || fund || center || section.length > 0);
+
+  const filterLabel = [
+    fund && `Fund: ${fund}`,
+    section.length > 0 && `Section: ${section.join(", ")}`,
+    center && `Center: ${center}`,
+    search && `Search: "${search}"`,
+  ].filter(Boolean).join(" | ");
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -119,7 +129,7 @@ export default function HomePage() {
             columnBudgetTotal={data?.totalBudget}
             filteredBudget={data?.totalBudget}
             filteredItems={data?.total}
-            isFiltered={!!(search || fund || center || section.length > 0)}
+            isFiltered={isFiltered}
           />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -133,6 +143,36 @@ export default function HomePage() {
           </div>
         )}
       </div>
+
+      {/* Filtered summary cards */}
+      {isFiltered && data && (() => {
+        const fmt = (n: number) => new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+        const fBudget = data.totalBudget;
+        const fSpent = data.filteredSpent;
+        const fRemaining = fBudget - fSpent;
+        return (
+          <div className="mb-6">
+            <p className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-2">{filterLabel}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-blue-50 dark:bg-blue-900/15 rounded-xl border border-blue-200 dark:border-blue-800/50 p-4 shadow-sm">
+                <p className="text-sm text-blue-600 dark:text-blue-400 mb-1">Filtered Budget</p>
+                <p className="text-xl font-bold text-blue-900 dark:text-blue-300">{fmt(fBudget)}</p>
+                <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">{data.total} items</p>
+              </div>
+              <div className="bg-blue-50 dark:bg-blue-900/15 rounded-xl border border-blue-200 dark:border-blue-800/50 p-4 shadow-sm">
+                <p className="text-sm text-blue-600 dark:text-blue-400 mb-1">Filtered Spent</p>
+                <p className="text-xl font-bold text-blue-900 dark:text-blue-300">{fmt(fSpent)}</p>
+                <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">PO + Other PV</p>
+              </div>
+              <div className={`rounded-xl border p-4 shadow-sm ${fRemaining >= 0 ? "bg-green-50 dark:bg-green-900/15 border-green-200 dark:border-green-800/50" : "bg-red-50 dark:bg-red-900/15 border-red-200 dark:border-red-800/50"}`}>
+                <p className={`text-sm mb-1 ${fRemaining >= 0 ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}`}>Filtered Remaining</p>
+                <p className={`text-xl font-bold ${fRemaining >= 0 ? "text-green-900 dark:text-green-300" : "text-red-900 dark:text-red-300"}`}>{fmt(fRemaining)}</p>
+                <p className={`text-xs mt-1 ${fRemaining >= 0 ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}`}>Budget - Spent</p>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Fund breakdown */}
       <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">

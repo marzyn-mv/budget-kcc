@@ -313,10 +313,20 @@ async function fetchList(
       const effectiveLimit = showAll ? count : limit;
       const approvedBudget = parseFloat(sumResult.rows[0].total);
 
+      // Compute filtered spent/acr totals across ALL filtered items
+      let filteredSpent = 0;
+      let filteredAcr = 0;
+      for (const entry of spentMap.values()) {
+        filteredSpent += entry.po + entry.voucher;
+        filteredAcr += entry.acr;
+      }
+
       return {
         items: rows,
         total: count,
         totalBudget: approvedBudget + filteredBcNet,
+        filteredSpent,
+        filteredAcr,
         page: showAll ? 1 : page,
         limit: effectiveLimit,
         totalPages: showAll ? 1 : Math.ceil(count / limit),
