@@ -49,14 +49,28 @@ async function fetchSummary() {
             ), 0) as total_acr
         `,
         sql`
-          SELECT fund, COUNT(*) as count,
-            COALESCE(SUM(CAST(REPLACE(REPLACE(budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total
-          FROM budget_items GROUP BY fund ORDER BY total DESC
+          SELECT b.fund, COUNT(*) as count,
+            COALESCE(SUM(CAST(REPLACE(REPLACE(b.budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total,
+            COALESCE(SUM(
+              (SELECT COALESCE(SUM(bc.amount), 0) FROM budget_controls bc
+               WHERE TRIM(bc.cr_activity) = TRIM(b.activity_detail) AND bc.cr_gl_code = b.gl_code AND bc.cr_fund = b.fund)
+              -
+              (SELECT COALESCE(SUM(bc.amount), 0) FROM budget_controls bc
+               WHERE TRIM(bc.dr_activity) = TRIM(b.activity_detail) AND bc.dr_gl_code = b.gl_code AND bc.dr_fund = b.fund)
+            ), 0) as bc_net
+          FROM budget_items b GROUP BY b.fund ORDER BY total DESC
         `,
         sql`
-          SELECT center_name as center, COUNT(*) as count,
-            COALESCE(SUM(CAST(REPLACE(REPLACE(budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total
-          FROM budget_items GROUP BY center_name ORDER BY total DESC
+          SELECT b.center_name as center, COUNT(*) as count,
+            COALESCE(SUM(CAST(REPLACE(REPLACE(b.budget, ',', ''), ' ', '') AS NUMERIC)), 0) as total,
+            COALESCE(SUM(
+              (SELECT COALESCE(SUM(bc.amount), 0) FROM budget_controls bc
+               WHERE TRIM(bc.cr_activity) = TRIM(b.activity_detail) AND bc.cr_gl_code = b.gl_code AND bc.cr_fund = b.fund)
+              -
+              (SELECT COALESCE(SUM(bc.amount), 0) FROM budget_controls bc
+               WHERE TRIM(bc.dr_activity) = TRIM(b.activity_detail) AND bc.dr_gl_code = b.gl_code AND bc.dr_fund = b.fund)
+            ), 0) as bc_net
+          FROM budget_items b GROUP BY b.center_name ORDER BY total DESC
         `,
       ]);
 
@@ -74,12 +88,12 @@ async function fetchSummary() {
         byFund: byFundResult.rows.map((r) => ({
           ...r,
           count: parseInt(r.count),
-          total: parseFloat(r.total),
+          total: parseFloat(r.total) + (parseFloat(r.bc_net) || 0),
         })),
         byCenter: byCenterResult.rows.map((r) => ({
           ...r,
           count: parseInt(r.count),
-          total: parseFloat(r.total),
+          total: parseFloat(r.total) + (parseFloat(r.bc_net) || 0),
         })),
       };
     },
@@ -282,12 +296,12 @@ async function fetchList(
       const [bcCreditResult, bcDebitResult] = await Promise.all([
         query<{ total: string }>(
           `SELECT COALESCE(SUM(amount), 0) as total FROM budget_controls
-           WHERE (TRIM(cr_activity), cr_gl_code) IN (SELECT DISTINCT TRIM(activity_detail), gl_code FROM budget_items ${where})`,
+           WHERE (TRIM(cr_activity), cr_gl_code, cr_fund) IN (SELECT DISTINCT TRIM(activity_detail), gl_code, fund FROM budget_items ${where})`,
           params
         ),
         query<{ total: string }>(
           `SELECT COALESCE(SUM(amount), 0) as total FROM budget_controls
-           WHERE (TRIM(dr_activity), dr_gl_code) IN (SELECT DISTINCT TRIM(activity_detail), gl_code FROM budget_items ${where})`,
+           WHERE (TRIM(dr_activity), dr_gl_code, dr_fund) IN (SELECT DISTINCT TRIM(activity_detail), gl_code, fund FROM budget_items ${where})`,
           params
         ),
       ]);
