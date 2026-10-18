@@ -160,7 +160,7 @@ async function fetchList(
         };
       });
 
-      const spentMap = new Map<string, { po: number; voucher: number }>();
+      const spentMap = new Map<string, { po: number; voucher: number; acr: number }>();
       const bcMap = new Map<string, number>();
 
       if (keys.length > 0) {
@@ -191,7 +191,7 @@ async function fetchList(
         });
         const agClause = agPlaceholders.join(", ");
 
-        const [poSpent, voucherSpent] = await Promise.all([
+        const [poSpent, voucherSpent, acrSpent] = await Promise.all([
           // PO total (all active POs, excluding summary rows with empty po_full)
           query<{ gl_code: string; activity_detail: string; fund_code: string; total: string }>(
             `SELECT gl_code, activity_detail, fund_code, COALESCE(SUM(total), 0) as total
@@ -201,11 +201,12 @@ async function fetchList(
              GROUP BY gl_code, activity_detail, fund_code`,
             valuesParams
           ),
-          // Other PV: vouchers that are NOT linked to an existing PO
+          // Other PV: vouchers of type 'Other' that are NOT linked to an existing PO
           query<{ gl_code: string; activity_detail: string; fund_code: string; total: string }>(
             `SELECT gl_code, activity_detail, fund_code, COALESCE(SUM(total), 0) as total
              FROM voucher_reports vr
              WHERE vr.cancelled != 'Yes'
+               AND vr.voucher_type = 'Other'
                AND (vr.po IS NULL OR vr.po = '' OR vr.po = '-'
                  OR vr.po NOT IN (SELECT po_full FROM po_reports pr WHERE pr.po_full IS NOT NULL AND pr.po_full != '' AND pr.cancelled != 'Yes'
                    AND pr.gl_code = vr.gl_code AND pr.activity_detail = vr.activity_detail AND pr.fund_code = vr.fund_code))
@@ -213,18 +214,33 @@ async function fetchList(
              GROUP BY gl_code, activity_detail, fund_code`,
             valuesParams
           ),
+          // ACR total (active ACRs)
+          query<{ gl_code: string; activity_detail: string; fund_code: string; total: string }>(
+            `SELECT gl_code, activity_detail, fund_code, COALESCE(SUM(total), 0) as total
+             FROM acr_reports
+             WHERE cancelled != 'Yes'
+               AND (gl_code, activity_detail, fund_code) IN (${valuesClause})
+             GROUP BY gl_code, activity_detail, fund_code`,
+            valuesParams
+          ),
         ]);
 
         for (const r of poSpent.rows) {
           const key = `${r.gl_code}|${r.activity_detail}|${r.fund_code}`;
-          const entry = spentMap.get(key) || { po: 0, voucher: 0 };
+          const entry = spentMap.get(key) || { po: 0, voucher: 0, acr: 0 };
           entry.po = parseFloat(r.total);
           spentMap.set(key, entry);
         }
         for (const r of voucherSpent.rows) {
           const key = `${r.gl_code}|${r.activity_detail}|${r.fund_code}`;
-          const entry = spentMap.get(key) || { po: 0, voucher: 0 };
+          const entry = spentMap.get(key) || { po: 0, voucher: 0, acr: 0 };
           entry.voucher = parseFloat(r.total);
+          spentMap.set(key, entry);
+        }
+        for (const r of acrSpent.rows) {
+          const key = `${r.gl_code}|${r.activity_detail}|${r.fund_code}`;
+          const entry = spentMap.get(key) || { po: 0, voucher: 0, acr: 0 };
+          entry.acr = parseFloat(r.total);
           spentMap.set(key, entry);
         }
 
@@ -276,13 +292,13 @@ async function fetchList(
       const rows = itemsResult.rows.map((r) => {
         const row = r as Record<string, unknown>;
         const key = `${row.gl_code}|${row.activity_detail}|${row.fund}`;
-        const spent = spentMap.get(key) || { po: 0, voucher: 0 };
+        const spent = spentMap.get(key) || { po: 0, voucher: 0, acr: 0 };
         const bcKey = `${row.activity_detail}|${row.gl_code}`;
         return {
           ...r,
           po_spent: spent.po,
           voucher_spent: spent.voucher,
-          acr_spent: 0,
+          acr_spent: spent.acr,
           budget_control: bcMap.get(bcKey) || 0,
         };
       });

@@ -178,7 +178,7 @@ export default function BudgetTable({
                   </span>
                 </div>
                 <span className="text-base font-mono font-bold text-gray-900 dark:text-[#E4E6E7]">
-                  {fmt(parseBudget(item.budget))}
+                  {fmt(budget)}
                 </span>
               </div>
               <p className="text-sm font-medium text-gray-900 dark:text-[#E4E6E7] mb-2">
@@ -209,6 +209,9 @@ export default function BudgetTable({
                   </span>
                   <span className={remaining >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
                     Remaining: <span className="font-mono font-medium">{fmt(remaining)}</span>
+                  </span>
+                  <span className="text-teal-600 dark:text-teal-400">
+                    Avail. BC: <span className="font-mono font-medium">{fmt(spent - (item.acr_spent || 0))}</span>
                   </span>
                 </div>
               )}
@@ -247,6 +250,7 @@ export default function BudgetTable({
             <col className="w-28" />
             {showExpenses && (
               <>
+                <col className="w-28" />
                 <col className="w-28" />
                 <col className="w-28" />
               </>
@@ -296,6 +300,9 @@ export default function BudgetTable({
                   </th>
                   <th className="px-2 py-2.5 text-right text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase">
                     Remaining
+                  </th>
+                  <th className="px-2 py-2.5 text-right text-xs font-semibold text-gray-600 dark:text-[#9BA1A6] uppercase">
+                    Avail. for BC
                   </th>
                 </>
               )}
@@ -354,7 +361,7 @@ export default function BudgetTable({
                     <GlTooltip code={item.gl_code} name={glNames[item.gl_code]} />
                   </td>
                   <td className="px-2 py-2.5 text-sm text-gray-900 dark:text-[#E4E6E7] text-right font-mono font-medium">
-                    {fmt(parseBudget(item.budget))}
+                    {fmt(budget)}
                   </td>
                   {showExpenses && (
                     <>
@@ -367,6 +374,9 @@ export default function BudgetTable({
                         }`}
                       >
                         {fmt(remaining)}
+                      </td>
+                      <td className="px-2 py-2.5 text-sm text-right font-mono font-medium text-teal-600 dark:text-teal-400">
+                        {fmt(spent - (item.acr_spent || 0))}
                       </td>
                     </>
                   )}

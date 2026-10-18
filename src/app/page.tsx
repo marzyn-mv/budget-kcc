@@ -116,6 +116,7 @@ export default function HomePage() {
             totalSpent={summary.totalSpent}
             totalAcr={summary.totalAcr}
             totalItems={summary.totalItems}
+            columnBudgetTotal={data?.totalBudget}
             filteredBudget={data?.totalBudget}
             filteredItems={data?.total}
             isFiltered={!!(search || fund || center || section.length > 0)}

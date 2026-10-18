@@ -66,15 +66,17 @@ export async function GET(req: NextRequest) {
         .filter(Boolean)
     );
 
-    // Other PV: active vouchers NOT linked to an existing PO
+    // Other PV: active vouchers of type 'Other' NOT linked to an existing PO
     const activeVouchers = voucherResult.rows.filter(
       (r) => String((r as Record<string, unknown>).cancelled || "") !== "Yes"
     );
     const voucherTotal = activeVouchers.reduce(
       (sum, r) => {
-        const vpo = String((r as Record<string, unknown>).po || "");
+        const row = r as Record<string, unknown>;
+        if (String(row.voucher_type || "") !== "Other") return sum;
+        const vpo = String(row.po || "");
         if (vpo && vpo !== "-" && poNumbers.has(vpo)) return sum;
-        return sum + parseFloat(String(r.total) || "0");
+        return sum + parseFloat(String(row.total) || "0");
       },
       0
     );

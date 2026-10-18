@@ -6,6 +6,7 @@ interface Props {
   totalAcr: number;
   totalItems: number;
   totalBcNet?: number;
+  columnBudgetTotal?: number;
   filteredBudget?: number;
   filteredItems?: number;
   isFiltered?: boolean;
@@ -24,11 +25,12 @@ export default function SummaryCards({
   totalAcr,
   totalItems,
   totalBcNet = 0,
+  columnBudgetTotal,
   filteredBudget,
   filteredItems,
   isFiltered = false,
 }: Props) {
-  const effectiveBudget = totalBudget + totalBcNet;
+  const effectiveBudget = columnBudgetTotal ?? (totalBudget + totalBcNet);
   const spent = totalSpent || 0;
   const totalRemaining = effectiveBudget - spent;
   const showFiltered = isFiltered && filteredBudget !== undefined;
