@@ -30,7 +30,7 @@ export default function SummaryCards({
   filteredItems,
   isFiltered = false,
 }: Props) {
-  const effectiveBudget = columnBudgetTotal ?? (totalBudget + totalBcNet);
+  const effectiveBudget = totalBudget;
   const spent = totalSpent || 0;
   const totalRemaining = effectiveBudget - spent;
   const showFiltered = isFiltered && filteredBudget !== undefined;
@@ -47,7 +47,7 @@ export default function SummaryCards({
             Approved {formatMVR(totalBudget)} | BC: {totalBcNet > 0 ? "+" : ""}{formatMVR(totalBcNet)}
           </p>
         ) : (
-          <p className="text-xs text-gray-500 dark:text-[#9BA1A6] mt-1">Approved Budget</p>
+          <p className="text-xs text-gray-500 dark:text-[#9BA1A6] mt-1">Available Budget</p>
         )}
       </div>
       <div className="bg-white dark:bg-[#1D1F20] rounded-xl border border-gray-200 dark:border-[#3A3F44] p-5 shadow-sm">

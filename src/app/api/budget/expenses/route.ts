@@ -20,30 +20,30 @@ export async function GET(req: NextRequest) {
       query(
         `SELECT id, po_create_date, po_full, supplier, total, po_remarks, cancelled
          FROM po_reports
-         WHERE gl_code = $1 AND activity_detail = $2 AND fund_code = $3
+         WHERE gl_code = $1 AND TRIM(activity_detail) = TRIM($2) AND fund_code = $3
          ORDER BY po_create_date DESC`,
         [gl_code, activity, fund]
       ),
       query(
         `SELECT id, produce_date, voucher_full, supplier, voucher_type, total, reason, cancelled, cheque_no, po
          FROM voucher_reports
-         WHERE gl_code = $1 AND activity_detail = $2 AND fund_code = $3
+         WHERE gl_code = $1 AND TRIM(activity_detail) = TRIM($2) AND fund_code = $3
          ORDER BY produce_date DESC`,
         [gl_code, activity, fund]
       ),
       query(
         `SELECT id, produce_date, voucher_full, total, remarks, cancelled
          FROM acr_reports
-         WHERE gl_code = $1 AND activity_detail = $2 AND fund_code = $3
+         WHERE gl_code = $1 AND TRIM(activity_detail) = TRIM($2) AND fund_code = $3
          ORDER BY produce_date DESC`,
         [gl_code, activity, fund]
       ),
       query(
         `SELECT id, budget_control_date, budget_control_no, amount, cr_gl_code, dr_gl_code,
                 cr_activity, dr_activity,
-                CASE WHEN cr_activity = $2 AND cr_gl_code = $1 THEN 'credit' ELSE 'debit' END as side
+                CASE WHEN TRIM(cr_activity) = TRIM($2) AND cr_gl_code = $1 THEN 'credit' ELSE 'debit' END as side
          FROM budget_controls
-         WHERE (cr_activity = $2 AND cr_gl_code = $1) OR (dr_activity = $2 AND dr_gl_code = $1)
+         WHERE (TRIM(cr_activity) = TRIM($2) AND cr_gl_code = $1) OR (TRIM(dr_activity) = TRIM($2) AND dr_gl_code = $1)
          ORDER BY budget_control_date DESC`,
         [gl_code, activity]
       ),

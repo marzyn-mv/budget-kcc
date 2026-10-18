@@ -34,13 +34,19 @@ async function fetchSummary() {
         `,
         sql`
           SELECT
-            COALESCE((SELECT SUM(total) FROM po_reports WHERE cancelled != 'Yes' AND po_full IS NOT NULL AND po_full != ''), 0) as po_total,
-            COALESCE((SELECT SUM(total) FROM voucher_reports vr WHERE vr.cancelled != 'Yes'
+            COALESCE((SELECT SUM(p.total) FROM po_reports p WHERE p.cancelled != 'Yes' AND p.po_full IS NOT NULL AND p.po_full != ''
+              AND (p.gl_code, TRIM(p.activity_detail), p.fund_code) IN (SELECT gl_code, TRIM(activity_detail), fund FROM budget_items)
+            ), 0) as po_total,
+            COALESCE((SELECT SUM(vr.total) FROM voucher_reports vr WHERE vr.cancelled != 'Yes'
+              AND vr.voucher_type = 'Other'
               AND (vr.po IS NULL OR vr.po = '' OR vr.po = '-'
                 OR vr.po NOT IN (SELECT po_full FROM po_reports pr WHERE pr.po_full IS NOT NULL AND pr.po_full != '' AND pr.cancelled != 'Yes'
-                  AND pr.gl_code = vr.gl_code AND pr.activity_detail = vr.activity_detail AND pr.fund_code = vr.fund_code))
+                  AND TRIM(pr.activity_detail) = TRIM(vr.activity_detail) AND pr.gl_code = vr.gl_code AND pr.fund_code = vr.fund_code))
+              AND (vr.gl_code, TRIM(vr.activity_detail), vr.fund_code) IN (SELECT gl_code, TRIM(activity_detail), fund FROM budget_items)
             ), 0) as other_pv_total,
-            COALESCE((SELECT SUM(total) FROM acr_reports WHERE cancelled != 'Yes'), 0) as total_acr
+            COALESCE((SELECT SUM(a.total) FROM acr_reports a WHERE a.cancelled != 'Yes'
+              AND (a.gl_code, TRIM(a.activity_detail), a.fund_code) IN (SELECT gl_code, TRIM(activity_detail), fund FROM budget_items)
+            ), 0) as total_acr
         `,
         sql`
           SELECT fund, COUNT(*) as count,
@@ -155,7 +161,7 @@ async function fetchList(
         const row = r as Record<string, string>;
         return {
           gl_code: row.gl_code,
-          activity_detail: row.activity_detail,
+          activity_detail: (row.activity_detail || "").trim(),
           fund: row.fund,
         };
       });
@@ -194,33 +200,33 @@ async function fetchList(
         const [poSpent, voucherSpent, acrSpent] = await Promise.all([
           // PO total (all active POs, excluding summary rows with empty po_full)
           query<{ gl_code: string; activity_detail: string; fund_code: string; total: string }>(
-            `SELECT gl_code, activity_detail, fund_code, COALESCE(SUM(total), 0) as total
+            `SELECT gl_code, TRIM(activity_detail) as activity_detail, fund_code, COALESCE(SUM(total), 0) as total
              FROM po_reports
              WHERE cancelled != 'Yes' AND po_full IS NOT NULL AND po_full != ''
-               AND (gl_code, activity_detail, fund_code) IN (${valuesClause})
-             GROUP BY gl_code, activity_detail, fund_code`,
+               AND (gl_code, TRIM(activity_detail), fund_code) IN (${valuesClause})
+             GROUP BY gl_code, TRIM(activity_detail), fund_code`,
             valuesParams
           ),
           // Other PV: vouchers of type 'Other' that are NOT linked to an existing PO
           query<{ gl_code: string; activity_detail: string; fund_code: string; total: string }>(
-            `SELECT gl_code, activity_detail, fund_code, COALESCE(SUM(total), 0) as total
+            `SELECT gl_code, TRIM(activity_detail) as activity_detail, fund_code, COALESCE(SUM(total), 0) as total
              FROM voucher_reports vr
              WHERE vr.cancelled != 'Yes'
                AND vr.voucher_type = 'Other'
                AND (vr.po IS NULL OR vr.po = '' OR vr.po = '-'
                  OR vr.po NOT IN (SELECT po_full FROM po_reports pr WHERE pr.po_full IS NOT NULL AND pr.po_full != '' AND pr.cancelled != 'Yes'
-                   AND pr.gl_code = vr.gl_code AND pr.activity_detail = vr.activity_detail AND pr.fund_code = vr.fund_code))
-               AND (vr.gl_code, vr.activity_detail, vr.fund_code) IN (${valuesClause})
-             GROUP BY gl_code, activity_detail, fund_code`,
+                   AND TRIM(pr.activity_detail) = TRIM(vr.activity_detail) AND pr.gl_code = vr.gl_code AND pr.fund_code = vr.fund_code))
+               AND (vr.gl_code, TRIM(vr.activity_detail), vr.fund_code) IN (${valuesClause})
+             GROUP BY gl_code, TRIM(activity_detail), fund_code`,
             valuesParams
           ),
           // ACR total (active ACRs)
           query<{ gl_code: string; activity_detail: string; fund_code: string; total: string }>(
-            `SELECT gl_code, activity_detail, fund_code, COALESCE(SUM(total), 0) as total
+            `SELECT gl_code, TRIM(activity_detail) as activity_detail, fund_code, COALESCE(SUM(total), 0) as total
              FROM acr_reports
              WHERE cancelled != 'Yes'
-               AND (gl_code, activity_detail, fund_code) IN (${valuesClause})
-             GROUP BY gl_code, activity_detail, fund_code`,
+               AND (gl_code, TRIM(activity_detail), fund_code) IN (${valuesClause})
+             GROUP BY gl_code, TRIM(activity_detail), fund_code`,
             valuesParams
           ),
         ]);
@@ -247,27 +253,27 @@ async function fetchList(
         // Budget controls: credit side adds, debit side subtracts
         const [bcCredits, bcDebits] = await Promise.all([
           query<{ cr_activity: string; cr_gl_code: string; total: string }>(
-            `SELECT cr_activity, cr_gl_code, COALESCE(SUM(amount), 0) as total
+            `SELECT TRIM(cr_activity) as cr_activity, cr_gl_code, COALESCE(SUM(amount), 0) as total
              FROM budget_controls
-             WHERE (cr_activity, cr_gl_code) IN (${agClause})
-             GROUP BY cr_activity, cr_gl_code`,
+             WHERE (TRIM(cr_activity), cr_gl_code) IN (${agClause})
+             GROUP BY TRIM(cr_activity), cr_gl_code`,
             agParams
           ),
           query<{ dr_activity: string; dr_gl_code: string; total: string }>(
-            `SELECT dr_activity, dr_gl_code, COALESCE(SUM(amount), 0) as total
+            `SELECT TRIM(dr_activity) as dr_activity, dr_gl_code, COALESCE(SUM(amount), 0) as total
              FROM budget_controls
-             WHERE (dr_activity, dr_gl_code) IN (${agClause})
-             GROUP BY dr_activity, dr_gl_code`,
+             WHERE (TRIM(dr_activity), dr_gl_code) IN (${agClause})
+             GROUP BY TRIM(dr_activity), dr_gl_code`,
             agParams
           ),
         ]);
 
         for (const r of bcCredits.rows) {
-          const key = `${r.cr_activity}|${r.cr_gl_code}`;
+          const key = `${r.cr_activity.trim()}|${r.cr_gl_code}`;
           bcMap.set(key, (bcMap.get(key) || 0) + parseFloat(r.total));
         }
         for (const r of bcDebits.rows) {
-          const key = `${r.dr_activity}|${r.dr_gl_code}`;
+          const key = `${r.dr_activity.trim()}|${r.dr_gl_code}`;
           bcMap.set(key, (bcMap.get(key) || 0) - parseFloat(r.total));
         }
       }
@@ -276,12 +282,12 @@ async function fetchList(
       const [bcCreditResult, bcDebitResult] = await Promise.all([
         query<{ total: string }>(
           `SELECT COALESCE(SUM(amount), 0) as total FROM budget_controls
-           WHERE (cr_activity, cr_gl_code) IN (SELECT DISTINCT activity_detail, gl_code FROM budget_items ${where})`,
+           WHERE (TRIM(cr_activity), cr_gl_code) IN (SELECT DISTINCT TRIM(activity_detail), gl_code FROM budget_items ${where})`,
           params
         ),
         query<{ total: string }>(
           `SELECT COALESCE(SUM(amount), 0) as total FROM budget_controls
-           WHERE (dr_activity, dr_gl_code) IN (SELECT DISTINCT activity_detail, gl_code FROM budget_items ${where})`,
+           WHERE (TRIM(dr_activity), dr_gl_code) IN (SELECT DISTINCT TRIM(activity_detail), gl_code FROM budget_items ${where})`,
           params
         ),
       ]);
@@ -291,9 +297,10 @@ async function fetchList(
 
       const rows = itemsResult.rows.map((r) => {
         const row = r as Record<string, unknown>;
-        const key = `${row.gl_code}|${row.activity_detail}|${row.fund}`;
+        const trimmedActivity = String(row.activity_detail || "").trim();
+        const key = `${row.gl_code}|${trimmedActivity}|${row.fund}`;
         const spent = spentMap.get(key) || { po: 0, voucher: 0, acr: 0 };
-        const bcKey = `${row.activity_detail}|${row.gl_code}`;
+        const bcKey = `${trimmedActivity}|${row.gl_code}`;
         return {
           ...r,
           po_spent: spent.po,

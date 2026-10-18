@@ -211,7 +211,7 @@ export default function BudgetTable({
                     Remaining: <span className="font-mono font-medium">{fmt(remaining)}</span>
                   </span>
                   <span className="text-teal-600 dark:text-teal-400">
-                    Avail. BC: <span className="font-mono font-medium">{fmt(spent - (item.acr_spent || 0))}</span>
+                    Avail. BC: <span className="font-mono font-medium">{fmt(budget - (item.acr_spent || 0))}</span>
                   </span>
                 </div>
               )}
@@ -376,7 +376,7 @@ export default function BudgetTable({
                         {fmt(remaining)}
                       </td>
                       <td className="px-2 py-2.5 text-sm text-right font-mono font-medium text-teal-600 dark:text-teal-400">
-                        {fmt(spent - (item.acr_spent || 0))}
+                        {fmt(budget - (item.acr_spent || 0))}
                       </td>
                     </>
                   )}
