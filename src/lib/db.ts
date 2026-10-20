@@ -81,6 +81,8 @@ async function ensureTables() {
 
     await sql`CREATE INDEX IF NOT EXISTS idx_bc_cr ON budget_controls(cr_activity, cr_gl_code)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_bc_dr ON budget_controls(dr_activity, dr_gl_code)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_bc_cr_match ON budget_controls(cr_gl_code, cr_activity, cr_fund)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_bc_dr_match ON budget_controls(dr_gl_code, dr_activity, dr_fund)`;
 
     await sql`CREATE TABLE IF NOT EXISTS gl_codes (
       id SERIAL PRIMARY KEY, gl_code TEXT NOT NULL UNIQUE,

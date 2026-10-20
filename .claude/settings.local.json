@@ -16,7 +16,8 @@
       "WebSearch",
       "Bash(curl:*)",
       "mcp__ide__getDiagnostics",
-      "Bash(timeout 20 bash:*)"
+      "Bash(timeout 20 bash:*)",
+      "PowerShell(npx tsc --noEmit -p .)"
     ]
   }
 }

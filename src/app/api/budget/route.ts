@@ -198,19 +198,6 @@ async function fetchList(
 
         const valuesClause = valuesPlaceholders.join(", ");
 
-        const uniqueActivityGl = [...new Map(keys.map((k) => [
-          `${k.activity_detail}|${k.gl_code}`, { activity: k.activity_detail, gl_code: k.gl_code }
-        ])).values()];
-
-        const agPlaceholders: string[] = [];
-        const agParams: string[] = [];
-        uniqueActivityGl.forEach((k, i) => {
-          const base = i * 2;
-          agPlaceholders.push(`($${base + 1}, $${base + 2})`);
-          agParams.push(k.activity, k.gl_code);
-        });
-        const agClause = agPlaceholders.join(", ");
-
         const [poSpent, voucherSpent, acrSpent] = await Promise.all([
           // PO total (all active POs, excluding summary rows with empty po_full)
           query<{ gl_code: string; activity_detail: string; fund_code: string; total: string }>(
@@ -264,30 +251,30 @@ async function fetchList(
           spentMap.set(key, entry);
         }
 
-        // Budget controls: credit side adds, debit side subtracts
+        // Budget controls: credit side adds, debit side subtracts (matched on GL + activity + fund)
         const [bcCredits, bcDebits] = await Promise.all([
-          query<{ cr_activity: string; cr_gl_code: string; total: string }>(
-            `SELECT TRIM(cr_activity) as cr_activity, cr_gl_code, COALESCE(SUM(amount), 0) as total
+          query<{ cr_gl_code: string; cr_activity: string; cr_fund: string; total: string }>(
+            `SELECT cr_gl_code, TRIM(cr_activity) as cr_activity, cr_fund, COALESCE(SUM(amount), 0) as total
              FROM budget_controls
-             WHERE (TRIM(cr_activity), cr_gl_code) IN (${agClause})
-             GROUP BY TRIM(cr_activity), cr_gl_code`,
-            agParams
+             WHERE (cr_gl_code, TRIM(cr_activity), cr_fund) IN (${valuesClause})
+             GROUP BY cr_gl_code, TRIM(cr_activity), cr_fund`,
+            valuesParams
           ),
-          query<{ dr_activity: string; dr_gl_code: string; total: string }>(
-            `SELECT TRIM(dr_activity) as dr_activity, dr_gl_code, COALESCE(SUM(amount), 0) as total
+          query<{ dr_gl_code: string; dr_activity: string; dr_fund: string; total: string }>(
+            `SELECT dr_gl_code, TRIM(dr_activity) as dr_activity, dr_fund, COALESCE(SUM(amount), 0) as total
              FROM budget_controls
-             WHERE (TRIM(dr_activity), dr_gl_code) IN (${agClause})
-             GROUP BY TRIM(dr_activity), dr_gl_code`,
-            agParams
+             WHERE (dr_gl_code, TRIM(dr_activity), dr_fund) IN (${valuesClause})
+             GROUP BY dr_gl_code, TRIM(dr_activity), dr_fund`,
+            valuesParams
           ),
         ]);
 
         for (const r of bcCredits.rows) {
-          const key = `${r.cr_activity.trim()}|${r.cr_gl_code}`;
+          const key = `${r.cr_gl_code}|${r.cr_activity}|${r.cr_fund}`;
           bcMap.set(key, (bcMap.get(key) || 0) + parseFloat(r.total));
         }
         for (const r of bcDebits.rows) {
-          const key = `${r.dr_activity.trim()}|${r.dr_gl_code}`;
+          const key = `${r.dr_gl_code}|${r.dr_activity}|${r.dr_fund}`;
           bcMap.set(key, (bcMap.get(key) || 0) - parseFloat(r.total));
         }
       }
@@ -314,13 +301,12 @@ async function fetchList(
         const trimmedActivity = String(row.activity_detail || "").trim();
         const key = `${row.gl_code}|${trimmedActivity}|${row.fund}`;
         const spent = spentMap.get(key) || { po: 0, voucher: 0, acr: 0 };
-        const bcKey = `${trimmedActivity}|${row.gl_code}`;
         return {
           ...r,
           po_spent: spent.po,
           voucher_spent: spent.voucher,
           acr_spent: spent.acr,
-          budget_control: bcMap.get(bcKey) || 0,
+          budget_control: bcMap.get(key) || 0,
         };
       });
 

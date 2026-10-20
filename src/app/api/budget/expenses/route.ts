@@ -40,12 +40,13 @@ export async function GET(req: NextRequest) {
       ),
       query(
         `SELECT id, budget_control_date, budget_control_no, amount, cr_gl_code, dr_gl_code,
-                cr_activity, dr_activity,
-                CASE WHEN TRIM(cr_activity) = TRIM($2) AND cr_gl_code = $1 THEN 'credit' ELSE 'debit' END as side
+                cr_activity, dr_activity, cr_fund, dr_fund,
+                CASE WHEN TRIM(cr_activity) = TRIM($2) AND cr_gl_code = $1 AND cr_fund = $3 THEN 'credit' ELSE 'debit' END as side
          FROM budget_controls
-         WHERE (TRIM(cr_activity) = TRIM($2) AND cr_gl_code = $1) OR (TRIM(dr_activity) = TRIM($2) AND dr_gl_code = $1)
+         WHERE (TRIM(cr_activity) = TRIM($2) AND cr_gl_code = $1 AND cr_fund = $3)
+            OR (TRIM(dr_activity) = TRIM($2) AND dr_gl_code = $1 AND dr_fund = $3)
          ORDER BY budget_control_date DESC`,
-        [gl_code, activity]
+        [gl_code, activity, fund]
       ),
     ]);
 
