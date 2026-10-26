@@ -52,7 +52,7 @@ const navGroups: NavGroup[] = [
     items: [
       { href: "/admin/gl-codes", label: "Budget GL Codes", icon: BookOpen },
       { href: "/admin/activities", label: "Activity Details", icon: ListChecks },
-      { href: "/admin/upload", label: "Upload Budget", icon: Upload },
+      { href: "/admin/upload", label: "Budget Items", icon: Upload },
       { href: "/admin/uploads", label: "Upload History", icon: FolderOpen },
     ],
   },
