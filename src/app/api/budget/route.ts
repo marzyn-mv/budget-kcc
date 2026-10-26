@@ -279,8 +279,9 @@ async function fetchList(
         }
       }
 
-      // Compute filtered BC net across ALL filtered items (not just current page)
-      const [bcCreditResult, bcDebitResult] = await Promise.all([
+      // Compute filtered totals across ALL filtered items (not just current page)
+      const filteredKeys = `SELECT DISTINCT gl_code, TRIM(activity_detail), fund FROM budget_items ${where}`;
+      const [bcCreditResult, bcDebitResult, poTotalResult, voucherTotalResult, acrTotalResult] = await Promise.all([
         query<{ total: string }>(
           `SELECT COALESCE(SUM(amount), 0) as total FROM budget_controls
            WHERE (TRIM(cr_activity), cr_gl_code, cr_fund) IN (SELECT DISTINCT TRIM(activity_detail), gl_code, fund FROM budget_items ${where})`,
@@ -289,6 +290,28 @@ async function fetchList(
         query<{ total: string }>(
           `SELECT COALESCE(SUM(amount), 0) as total FROM budget_controls
            WHERE (TRIM(dr_activity), dr_gl_code, dr_fund) IN (SELECT DISTINCT TRIM(activity_detail), gl_code, fund FROM budget_items ${where})`,
+          params
+        ),
+        query<{ total: string }>(
+          `SELECT COALESCE(SUM(total), 0) as total FROM po_reports
+           WHERE cancelled != 'Yes' AND po_full IS NOT NULL AND po_full != ''
+             AND (gl_code, TRIM(activity_detail), fund_code) IN (${filteredKeys})`,
+          params
+        ),
+        query<{ total: string }>(
+          `SELECT COALESCE(SUM(total), 0) as total FROM voucher_reports vr
+           WHERE vr.cancelled != 'Yes'
+             AND vr.voucher_type = 'Other'
+             AND (vr.po IS NULL OR vr.po = '' OR vr.po = '-'
+               OR vr.po NOT IN (SELECT po_full FROM po_reports pr WHERE pr.po_full IS NOT NULL AND pr.po_full != '' AND pr.cancelled != 'Yes'
+                 AND TRIM(pr.activity_detail) = TRIM(vr.activity_detail) AND pr.gl_code = vr.gl_code AND pr.fund_code = vr.fund_code))
+             AND (vr.gl_code, TRIM(vr.activity_detail), vr.fund_code) IN (${filteredKeys})`,
+          params
+        ),
+        query<{ total: string }>(
+          `SELECT COALESCE(SUM(total), 0) as total FROM acr_reports
+           WHERE cancelled != 'Yes'
+             AND (gl_code, TRIM(activity_detail), fund_code) IN (${filteredKeys})`,
           params
         ),
       ]);
@@ -313,13 +336,10 @@ async function fetchList(
       const effectiveLimit = showAll ? count : limit;
       const approvedBudget = parseFloat(sumResult.rows[0].total);
 
-      // Compute filtered spent/acr totals across ALL filtered items
-      let filteredSpent = 0;
-      let filteredAcr = 0;
-      for (const entry of spentMap.values()) {
-        filteredSpent += entry.po + entry.voucher;
-        filteredAcr += entry.acr;
-      }
+      const filteredSpent =
+        (parseFloat(poTotalResult.rows[0].total) || 0) +
+        (parseFloat(voucherTotalResult.rows[0].total) || 0);
+      const filteredAcr = parseFloat(acrTotalResult.rows[0].total) || 0;
 
       return {
         items: rows,
