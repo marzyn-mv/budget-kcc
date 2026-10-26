@@ -351,7 +351,7 @@ export default function BudgetTable({
                   <td className="px-2 py-2.5 text-sm text-gray-900 dark:text-[#E4E6E7] truncate" title={item.activity_detail}>
                     {item.activity_detail}
                   </td>
-                  <td className="px-2 py-2.5 text-xs text-gray-600 dark:text-[#9BA1A6] font-mono truncate">
+                  <td className="px-2 py-2.5 text-xs text-gray-600 dark:text-[#9BA1A6] font-mono truncate" title={item.prog}>
                     {item.prog}
                   </td>
                   <td className="px-2 py-2.5 text-xs text-gray-600 dark:text-[#9BA1A6] truncate" title={item.section}>

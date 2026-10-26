@@ -99,7 +99,10 @@ export default function ExpenseDetailModal({ item, onClose }: Props) {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-[#E4E6E7]">
               {item.activity_detail}
             </h3>
-            <div className="flex gap-3 mt-1 text-sm text-gray-500 dark:text-[#9BA1A6]">
+            <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-sm text-gray-500 dark:text-[#9BA1A6]">
+              {item.prog && (
+                <span>Activity No: <span className="font-mono break-all">{item.prog}</span></span>
+              )}
               <span>Fund: <span className="font-mono">{item.fund}</span></span>
               <span>GL: <span className="font-mono">{item.gl_code}</span></span>
               <span>Center: {item.center_name}</span>
