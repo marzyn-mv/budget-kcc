@@ -6,7 +6,6 @@ import ThemeToggle from "./ThemeToggle";
 const navLinks = [
   { href: "/", label: "Budget" },
   { href: "/budget-codes", label: "Budget Codes" },
-  { href: "/reports", label: "Reports" },
 ];
 
 export default function TopNav() {
